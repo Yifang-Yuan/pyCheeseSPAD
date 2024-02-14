@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Mar 15 20:50:05 2022
+This code is to analyse pyPhotometry recorded data when a mouse is performing cheeseboard task for a multiple trials.
 @author: Yifang
 """
 import pandas as pd
@@ -25,47 +26,6 @@ dpath="E:/SPAD/SPADData/20231027_GCamp8f_pyr_OECSync/2023_10_27_17_5_43_Cage_td_
 filename = os.path.join(dpath, "spc_data1.bin")
 Bindata=SPADreadBin.SPADreadBin(filename,pyGUI=False)
 SPADreadBin.ShowImage(Bindata,dpath) 
-
-def calculate_SNR_for_folder (parent_folder,mode='continuous'):
-    # Iterate over all folders in the parent folder
-    if mode=='continuous':
-        csv_filename="traceValueAll.csv"
-        SNR_savename='SPAD_SNR_continuous.csv'
-    if mode=='timedivision':
-        csv_filename="Green_traceAll.csv"
-        SNR_savename='SPAD_SNR_timedivision.csv'        
-    SNR_array = np.array([])
-    for folder_name in os.listdir(parent_folder):
-        folder_path = os.path.join(parent_folder, folder_name)
-        if os.path.isdir(folder_path):
-            filename=Analysis.Set_filename (folder_path, csv_filename)
-            Trace_raw=Analysis.getSignalTrace (filename, traceType='Constant',HighFreqRemoval=False,getBinTrace=False,bin_window=100)
-            fig, ax = plt.subplots(figsize=(12, 2.5))
-            Analysis.plot_trace(Trace_raw,ax, fs=9938.4, label="Full raw data trace")
-            SNR=Analysis.calculate_SNR(Trace_raw[0:9000])
-            SNR_array = np.append(SNR_array, SNR)
-            
-    csv_savename = os.path.join(parent_folder, SNR_savename)
-    np.savetxt(csv_savename, SNR_array, delimiter=',')
-    fig, ax = plt.subplots(figsize=(8, 8))
-    plt.plot(SNR_array, marker='o', linestyle='-', color='b')
-    plt.xlabel('Light Power (uW)')
-    plt.ylabel('SNR')
-    plt.title('SPAD_SNR_timedivision')
-    return -1
-
-#calculate_SNR_for_folder (parent_folder='C:/SPAD/SPADData/20240109_SNR/continuous/',mode='continuous')
-# parent_folder = 'C:/SPAD/SPADData/20240109_SNR/continuous/'
-# for folder_name in os.listdir(parent_folder):
-#     folder_path = os.path.join(parent_folder, folder_name)
-#     if os.path.isdir(folder_path):
-#         TraceRaw=SPADreadBin.readMultipleBinfiles(folder_path,1,xxRange=[80,220],yyRange=[120,240])
-
-# parent_folder = 'C:/SPAD/SPADData/20240109_g8fOEC/'
-# for folder_name in os.listdir(parent_folder):
-#     folder_path = os.path.join(parent_folder, folder_name)
-#     if os.path.isdir(folder_path):
-#         TraceRaw=SPADreadBin.readMultipleBinfiles(folder_path,9,xxRange=[80,220],yyRange=[100,240])
 
 #%%
 '''Time division mode with one ROI, GCamp and isosbestic'''

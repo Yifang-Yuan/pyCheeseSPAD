@@ -13,6 +13,8 @@ from matplotlib.gridspec import GridSpec
 from scipy.signal import windows, butter, filtfilt
 from scipy.io import loadmat
 
+'''CV:coefficient of variation'''
+
 def Continuous_CV(filename,fs,lowpass=False):
     Two_traces=pd.read_csv(filename)
     signal=Two_traces['Analog1']

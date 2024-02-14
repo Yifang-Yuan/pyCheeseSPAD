@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Aug 17 20:22:58 2023
-
 @author: Yifang
+
+This code is to analyse pyPhotometry recorded data when a mouse is performing cheeseboard task for a multiple trials.
+A sync pulse was send to pyPhotometry Digital 1 as CamSync
+An LED pulse was recorded by the camera to sync the photometry signal with the animal's behaviour.
+
+Analysing of behaviour was performed with COLD-a cheeseboard behaviour tracking pipeline developed by Daniel-Lewis Fallows
 """
 
 import numpy as np
@@ -23,7 +28,8 @@ CamFs=24
 #half_timewindow=1
 animalID='(Mouse 1665D4 GCcamp8)'
 #%%
-cheeaseboard_session_data=fp.read_cheeseboard_from_COLD (COLD_folder, COLD_filename)
+#cheeaseboard_session_data=fp.read_cheeseboard_from_COLD (COLD_folder, COLD_filename)
+'''This function will read all photometry recording and COLD file for a session or multiple trials'''
 df_py_cheese=fp.read_all_photometry_files(folder, '2023','Sync',CamFs,pyFs,COLD_folder,COLD_filename)
 #%%
 #Enter the value 

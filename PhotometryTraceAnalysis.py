@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Nov 13 16:13:41 2022
+This file is to read and analyse pyPhotometry recordings. 
+Also include a demostration of how the analysis is performed
+It is modified from:
+https://github.com/katemartian/Photometry_data_processing
+
 @author: Yifang
 """
 import numpy as np
 import matplotlib.pyplot as plt
 import photometry_functions as fp
 import scipy
-import traceAnalysis as Analysis
 import os
 # Folder with your files
 #folder = 'C:/SPAD/pyPhotometry_v0.3.1/data/' # Modify it depending on where your file is located
@@ -15,37 +19,18 @@ folder ='E:/SPAD/SPADData/20240105_pyPhotometry_SNR/timedivision/'
 # File name
 file_name = 'SNR_cont1mA-2024-01-04-180856.csv'
 sampling_rate=130
-#%%`
+#%%
+'''Read csv file and calculate zscore of the fluorescent signal'''
 raw_signal,raw_reference,Cam_Sync=fp.read_photometry_data (folder, file_name, readCamSync=True,plot=True)
+'''Get zdFF directly'''
+zdFF = fp.get_zdFF(raw_reference,raw_signal,smooth_win=5,remove=0,lambd=5e4,porder=1,itermax=50)
+fig = plt.figure(figsize=(16, 5))
+ax1 = fig.add_subplot(111)
+ax1 = fp.plotSingleTrace (ax1, zdFF, SamplingRate=sampling_rate,color='black',Label='zscore_signal')
 #raw_signal,raw_reference=read_photometry_data (folder, file_name, readCamSync='False')
 #CamSyncfname = os.path.join(folder, "CamSync_photometry.csv")
 #np.savetxt(CamSyncfname, Cam_Sync, fmt='%d',delimiter=",")
 #%%
-#raw_signal,raw_reference=fp.read_photometry_data (folder, file_name, readCamSync=False,plot=True)
-import glob
-def calculate_SNR_for_photometry_folder (parent_folder):
-    # Iterate over all folders in the parent folder
-    SNR_savename='pyPhotometry_SNR_timedivision.csv'        
-    SNR_array = np.array([])
-    all_files = os.listdir(parent_folder)
-    csv_files = [file for file in all_files if file.endswith('.csv')]
-    print(csv_files)
-    for csv_file in csv_files:
-        print('111',csv_file)
-        raw_signal,raw_reference=fp.read_photometry_data (parent_folder, csv_file, readCamSync=False,plot=True)
-        SNR=Analysis.calculate_SNR(raw_signal)
-        SNR_array = np.append(SNR_array, SNR)
-    csv_savename = os.path.join(parent_folder, SNR_savename)
-    np.savetxt(csv_savename, SNR_array, delimiter=',')
-    fig, ax = plt.subplots(figsize=(8, 8))
-    plt.plot(SNR_array, marker='o', linestyle='-', color='b')
-    plt.xlabel('Light Power (uW)')
-    plt.ylabel('SNR')
-    return -1
-
-calculate_SNR_for_photometry_folder (folder)
-%
-# snr_py=Analysis.calculate_SNR (raw_signal)
 '''Define the segments you want to zoom in, in seconds'''
 def get_part_trace(data,start_time,end_time,fs):
     start_time=start_time
@@ -65,7 +50,7 @@ def get_part_trace(data,start_time,end_time,fs):
 # ax2 = fp.plotSingleTrace (ax2, raw_reference, SamplingRate=sampling_rate,color='purple',Label='Reference')
 #%%
 '''
-You can get zdFF directly by calling the function fp.get_zdFF(),at the end of this file
+You can get zdFF directly by calling the function fp.get_zdFF()
 TO CHECK THE SIGNAL STEP BY STEP:
 YOU CAN USE THE FOLLOWING CODES TO GET MORE PLOTS
 These will give you plots for 
@@ -130,7 +115,6 @@ redfname = os.path.join(folder, "Red_traceAll.csv")
 np.savetxt(redfname, raw_reference, delimiter=",")
 zscorefname = os.path.join(folder, "Zscore_traceAll.csv")
 np.savetxt(zscorefname, zdFF, delimiter=",")
-#%%
 
 #%%
 '''Optional, for spectrogram'''
@@ -140,9 +124,3 @@ np.savetxt(zscorefname, zdFF, delimiter=",")
 # plt.xlabel('Time [sec]')
 # plt.ylim(0, 50)
 # plt.show()
-#%%
-'''Get zdFF directly'''
-zdFF = fp.get_zdFF(raw_reference,raw_signal,smooth_win=5,remove=0,lambd=5e4,porder=1,itermax=50)
-fig = plt.figure(figsize=(16, 5))
-ax1 = fig.add_subplot(111)
-ax1 = fp.plotSingleTrace (ax1, zdFF, SamplingRate=sampling_rate,color='black',Label='zscore_signal')
