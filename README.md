@@ -19,7 +19,7 @@ NOTE: These two files are designed for a specific experiment, you do not need th
 More information about the SPC imager can be found in the README of this repository: 
 https://github.com/MattNolanLab/SPAD_in_vivo
 
-`mianAnalysisSPC.py` is the main function to run to process data recorded by the SPC imager. This file includes lines to process binary files, demodulate time division mode recordings, and calculate zcore signal from signal channel and reference channel. 
+`mainAnalysisSPC.py` is the main function to run to process data recorded by the SPC imager. This file includes lines to process binary files, demodulate time division mode recordings, and calculate zcore signal from signal channel and reference channel. 
 
 `SPADreadBin.py` provides decoding functions for the binary data (,bin) saved by the SPC imager. Usually, we don't need to change anything here, functions are called by the `mianAnalysisSPC.py`.
 
