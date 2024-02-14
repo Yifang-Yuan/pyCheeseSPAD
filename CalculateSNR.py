@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Feb 14 14:15:07 2024
+To calculate SNR of a simple paper test with pyPhotometry and SPAD
 
 @author: Yifang
 """

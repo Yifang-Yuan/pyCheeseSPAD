@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Mar 15 20:50:05 2022
-This code is to analyse pyPhotometry recorded data when a mouse is performing cheeseboard task for a multiple trials.
+This is the main file to process the binary data recorded by the SPC imager. 
+
 @author: Yifang
 """
 import pandas as pd
@@ -18,7 +19,7 @@ fs   = 9938.4
 dpath="E:/SPAD/SPADData/20231027_GCamp8f_pyr_OECSync/2023_10_27_17_5_43_Cage_td_g30Iso20_recording1/"
 #Green,Red=SPADreadBin.readMultipleBinfiles_twoROIs(dpath,9,xxrange_g=[105,210],yyrange_g=[125,235],xxrange_r=[105,210],yyrange_r=[25,105]) 
 
-# '''Read binary files for single ROI'''
+'''Read binary files for single ROI'''
 #dpath="C:/SPAD/SPADData/20240109_SNR/timedivision/2024_1_9_16_16_31_td3uW/"
 #TraceRaw=SPADreadBin.readMultipleBinfiles(dpath,9,xxRange=[70,250],yyRange=[60,240])
 # Set the path to the parent folder

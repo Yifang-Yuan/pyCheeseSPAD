@@ -11,7 +11,6 @@ https://github.com/katemartian/Photometry_data_processing
 import numpy as np
 import matplotlib.pyplot as plt
 import photometry_functions as fp
-import scipy
 import os
 # Folder with your files
 #folder = 'C:/SPAD/pyPhotometry_v0.3.1/data/' # Modify it depending on where your file is located

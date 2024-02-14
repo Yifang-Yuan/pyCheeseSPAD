@@ -50,8 +50,6 @@ plt.figure(figsize=(20, 6))
 plt.plot(Rmlight_tissue,linewidth=1)
 plt.title("Cannula_After")
 
-
-
 #%%
 MeanPhotoCount=np.zeros(4)
 MeanPhotoCount[0]=DarkRoom.mean()
@@ -75,8 +73,7 @@ for p in ax.patches:
     ax.annotate(str(int(p.get_height())), (p.get_x() * 1.05, p.get_height() * 1.02))
 plt.xticks(rotation=45)
 
-#%%
-#%%
+
 # '''Tian sample data'''
 # dpath="C:/SPAD/SPADData/TianSampleData/continuous_SPAD/real_data"
 # filename = os.path.join(dpath, "spc_data3.bin")
@@ -101,7 +98,6 @@ ax.set_ylabel('Pixel number')
 #Red50mA=SPADreadBin.countTraceValue(dpath,Bindata,xxrange=[60,180],yyrange=[40,160]) 
 Dark=SPADreadBin.countTraceValue(dpath,Bindata,xxrange=[0,320],yyrange=[0,240]) 
 #%%
-Red50mA_mean=Red50mA.mean()
 #ShowImage(Bindata,dpath)
 #%%
 # HotPixelIdx,HotPixelNum=FindHotPixel(dpath,Bindata,thres=0.1)
