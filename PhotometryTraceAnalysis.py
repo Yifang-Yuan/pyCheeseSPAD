@@ -14,21 +14,27 @@ import photometry_functions as fp
 import os
 # Folder with your files
 #folder = 'C:/SPAD/pyPhotometry_v0.3.1/data/' # Modify it depending on where your file is located
-folder ='E:/SPAD/SPADData/20240105_pyPhotometry_SNR/timedivision/'
+folder ='C:/SPAD/SPADData/20240214_Day3/SyncRecording10/'
 # File name
-file_name = 'SNR_cont1mA-2024-01-04-180856.csv'
+file_name = '1732333-2024-02-14-154153.csv'
 sampling_rate=130
 #%%
 '''Read csv file and calculate zscore of the fluorescent signal'''
 raw_signal,raw_reference,Cam_Sync=fp.read_photometry_data (folder, file_name, readCamSync=True,plot=True)
 '''Get zdFF directly'''
-zdFF = fp.get_zdFF(raw_reference,raw_signal,smooth_win=5,remove=0,lambd=5e4,porder=1,itermax=50)
+zdFF = fp.get_zdFF(raw_reference,raw_signal,smooth_win=2,remove=0,lambd=5e4,porder=1,itermax=50)
 fig = plt.figure(figsize=(16, 5))
 ax1 = fig.add_subplot(111)
 ax1 = fp.plotSingleTrace (ax1, zdFF, SamplingRate=sampling_rate,color='black',Label='zscore_signal')
-#raw_signal,raw_reference=read_photometry_data (folder, file_name, readCamSync='False')
-#CamSyncfname = os.path.join(folder, "CamSync_photometry.csv")
-#np.savetxt(CamSyncfname, Cam_Sync, fmt='%d',delimiter=",")
+'''Save signal'''
+greenfname = os.path.join(folder, "Green_traceAll.csv")
+np.savetxt(greenfname, raw_signal, delimiter=",")
+redfname = os.path.join(folder, "Red_traceAll.csv")
+np.savetxt(redfname, raw_reference, delimiter=",")
+zscorefname = os.path.join(folder, "Zscore_traceAll.csv")
+np.savetxt(zscorefname, zdFF, delimiter=",")
+CamSyncfname = os.path.join(folder, "CamSync_photometry.csv")
+np.savetxt(CamSyncfname, Cam_Sync, fmt='%d',delimiter=",")
 #%%
 '''Define the segments you want to zoom in, in seconds'''
 def get_part_trace(data,start_time,end_time,fs):
@@ -56,7 +62,7 @@ These will give you plots for
 smoothed signal, corrected signal, normalised signal and the final zsocre
 '''
 '''Step 1, plot smoothed traces'''
-smooth_win = 1
+smooth_win = 10
 smooth_reference,smooth_signal,r_base,s_base = fp.photometry_smooth_plot (
     raw_reference,raw_signal,sampling_rate=sampling_rate, smooth_win = smooth_win)
 #%%
@@ -89,8 +95,8 @@ lin = Lasso(alpha=0.001,precompute=True,max_iter=1000,
             positive=True, random_state=9999, selection='random')
 n = len(z_reference)
 '''Need to change to numpy if previous smooth window is 1'''
-z_signal=z_signal.to_numpy()
-z_reference=z_reference.to_numpy()
+# z_signal=z_signal.to_numpy()
+# z_reference=z_reference.to_numpy()
 ''
 lin.fit(z_reference.reshape(n,1), z_signal.reshape(n,1))
 
@@ -106,14 +112,6 @@ zdFF = (z_signal - z_reference_fitted)
 fig = plt.figure(figsize=(16, 5))
 ax1 = fig.add_subplot(111)
 ax1 = fp.plotSingleTrace (ax1, zdFF, SamplingRate=sampling_rate,color='black',Label='zscore_signal')
-
-'''Save signal'''
-greenfname = os.path.join(folder, "Green_traceAll.csv")
-np.savetxt(greenfname, raw_signal, delimiter=",")
-redfname = os.path.join(folder, "Red_traceAll.csv")
-np.savetxt(redfname, raw_reference, delimiter=",")
-zscorefname = os.path.join(folder, "Zscore_traceAll.csv")
-np.savetxt(zscorefname, zdFF, delimiter=",")
 
 #%%
 '''Optional, for spectrogram'''
