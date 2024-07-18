@@ -11,7 +11,7 @@ https://github.com/katemartian/Photometry_data_processing
 ### Cheeseboard task with photometry recording
 `pyCheese_singleTrial.py` and `pyCheese_multiTrial.py` provide photometry data analysis with cheeseboard task. 
 
-A prerequisition is COLD pipeline (Lewis-Fallows 2024) to process cheeseboard behavioural data. 
+A prerequisition is COLD pipeline (Daniel Lewis-Fallows,2024maybe) to process cheeseboard behavioural data. 
 
 NOTE: These two files are designed for a specific experiment, you do not need them to perform other pyPhotometry related analysis.
 
