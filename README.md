@@ -9,8 +9,10 @@ https://github.com/katemartian/Photometry_data_processing
 `PhotometryRunSingleTrace.py` is the main file to read and process pyPhotometry data, you'll be able to save normalised signal trace `"Green_traceAll.csv"`, reference trace `"Red_traceAll.csv"`, zscore trace `"Zscore_traceAll.csv"`. For photometry recording with behaviour tasks,a CamSync file if synchronisation is included: `"CamSync_photometry.csv"`.
 
 **Sample data and example output**
-For two samples in `pyPhotometrySampleData`, I recorded an animal during anaesthesia and the wake-up period. The animal was injected with GCamp8s(aav retro) into CA1. The signal has regular transients because this paper found that we can detect 0.1Hz sharp waves by calcium recording in the hippocampus when the animal is anesthetised by isoflurane.
-Anesthetics fragment hippocampal network activity, alter spine dynamics, and affect memory consolidation: https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001146
+
+For two samples in `pyPhotometrySampleData`, they are recorded an anaesthetised animal and during the wake-up period respectively. The animal was injected with GCamp8s(aav retro) into CA1. The signal has regular and high amplitude transients because a study found that we can detect 0.1Hz sharp waves by calcium recording in the hippocampus when the animal is anesthetised by isoflurane.
+
+**Reference:** Anesthetics fragment hippocampal network activity, alter spine dynamics, and affect memory consolidation: https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001146
 
 ![image](https://github.com/user-attachments/assets/aebf2bc2-d209-458f-a406-f83dae1e11b6)
 
