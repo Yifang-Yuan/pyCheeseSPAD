@@ -512,6 +512,7 @@ def Plot_multiple_PETH_different_window(df_py_cheese,before_window,after_window,
     plt.legend()
     plt.show()
     return event_window_traces
+
 def Read_Concat_pkl_files (folder, IndexNumFromFilename=-4):
     dfs = []
     for filename in os.listdir(folder):

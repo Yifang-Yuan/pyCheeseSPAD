@@ -38,8 +38,7 @@ after_window=5
 event_window_traces=fp.Plot_multiple_PETH_different_window(df_py_cheese,before_window,after_window,fs=pyFs,animalID=animalID)
 '''save the pkl file for the PETH data with half window time specified'''
 filename='1665D4PETH_'+str(before_window)+'seconds_day4.pkl'
-event_window_traces.to_pickle(folder+filename)
-
+event_window_traces.to_pickle(os.path.join(folder, filename))
 #%%
 '''plot traces all together'''
 ''' you need to put all the PETH files with the same half window in the same folder '''
