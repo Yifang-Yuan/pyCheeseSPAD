@@ -16,11 +16,19 @@ For two samples in `pyPhotometrySampleData`, they are recorded an anaesthetised 
 
 ![image](https://github.com/user-attachments/assets/aebf2bc2-d209-458f-a406-f83dae1e11b6)
 
-### Cheeseboard task with photometry recording
-`pyCheese_singleTrial.py` and `pyCheese_multiTrial.py` provide photometry data analysis with cheeseboard task. 
+## Cheeseboard task with photometry recording
+A prerequisition is COLD pipeline (Daniel Lewis-Fallows,2024maybe) to process cheeseboard behavioural data. The output is .xlxs files that will be read in this part of analysis.
 
-A prerequisition is COLD pipeline (Daniel Lewis-Fallows,2024maybe) to process cheeseboard behavioural data. 
+Example data structure of COLD output:
 
+![image](https://github.com/user-attachments/assets/ff561104-9c71-4527-815f-6b0f532a63e5)
+
+`pyCheese_singleTrial.py` is only used to demonstrate synchronisation of behaviour and photometry data, and plot optical transient during collecting reward time for a single cheeseboard trial. It is not useful for averaging multiple trials or comparing across day sessions, etc. 
+Output example:
+
+![image](https://github.com/user-attachments/assets/899a678b-b66d-427c-ab4b-e442660b681a)
+
+`pyCheese_multiTrial.py` photometry data analysis for a day session with multiple training trials. 
 NOTE: These two files are designed for a specific experiment, you do not need them to perform other pyPhotometry related analysis.
 
 ## SPAD-SPC imager data processing
