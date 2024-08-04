@@ -63,8 +63,11 @@ def get_zdFF(reference,signal,smooth_win=10,remove=200,lambd=5e4,porder=1,iterma
   lin = Lasso(alpha=0.0001,precompute=True,max_iter=1000,
               positive=True, random_state=9999, selection='random')
   n = len(reference)
-  signal=signal.to_numpy()
-  reference=reference.to_numpy()
+  if not isinstance(signal, np.ndarray):
+      signal=signal.to_numpy()
+  if not isinstance(reference, np.ndarray):
+      reference=reference.to_numpy()
+      
   lin.fit(reference.reshape(n,1), signal.reshape(n,1))
   reference = lin.predict(reference.reshape(n,1)).reshape(n,)
 
@@ -288,13 +291,17 @@ def sync_photometry_Cam(zdFF,Cam_Sync,CamSync_LED,CamFs):
 
 def adjust_time_to_photometry(cheeaseboard_session_data,trial_index,Sync_Start_time):
     '''This code adjust the cheeseboard timing from the COLD to sync with the photometry trace
-    The returned time points are the time in the photometry trace'''
-    startingtime_COLD=cheeaseboard_session_data['startingtime'][trial_index]
-    well1time_COLD=cheeaseboard_session_data['well1time'][trial_index]
-    well2time_COLD=cheeaseboard_session_data['well2time'][trial_index]
-    entertime=startingtime_COLD*1.25-Sync_Start_time
-    well1time=(well1time_COLD+startingtime_COLD)*1.25-Sync_Start_time
-    well2time=(well2time_COLD++startingtime_COLD)*1.25-Sync_Start_time
+    The returned time points are the time in the photometry trace.
+    The collumn name of cheeseboard_session_data depends on the output xlxs file from COLD'''
+    startingtime_COLD=cheeaseboard_session_data['startingtime_s'][trial_index]
+    well1time_COLD=cheeaseboard_session_data['well1time_s'][trial_index]
+    well2time_COLD=cheeaseboard_session_data['well2time_s'][trial_index]
+    entertime=startingtime_COLD-Sync_Start_time
+    well1time=(well1time_COLD+startingtime_COLD)-Sync_Start_time
+    well2time=(well2time_COLD+startingtime_COLD)-Sync_Start_time
+    print ('startingtime_py', entertime)
+    print ('well1time_py', well1time)
+    print ('well2time_py', well2time)
     return entertime, well1time, well2time
 
 def PETH_plot_zscore(ax, zscore_sync,centre_time, half_timewindow, fs,color,Label='zscore'):

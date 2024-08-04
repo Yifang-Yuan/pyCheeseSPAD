@@ -16,12 +16,12 @@ import scipy
 
 # Folder with your files
 #folder = 'C:/SPAD/pyPhotometry_v0.3.1/data/' # Modify it depending on where your file is located
-folder ='E:/Qingren/1002/Day2/'
-COLD_folder='E:/Qingren/'
+folder ='G:/CB_EC5aFibre/CB_EC5aFibre_1756072/1756072_day4/1756072CB/'
+COLD_folder='G:/CB_EC5aFibre/CB_EC5aFibre_1756072/workingfolder/'
 # File name
-file_name = '1002-2023-08-12-180348_9.csv'
-sync_filename='1002_Sync_9.csv'
-COLD_filename='Training Data_adjusted.xlsx'
+file_name = '1756072-2024-06-05-121453_8.csv'
+sync_filename='1756072_sync_8.csv'
+COLD_filename='Training Data_Day4.xlsx'
 
 '''Sampling rate of pyPhotometry is 130'''
 sampling_rate=130 
@@ -51,12 +51,12 @@ half_timewindow=2
 fig = plt.figure(figsize=(16, 5))
 ax = fig.add_subplot(111)
 fp.PETH_plot_zscore(ax, zscore_sync,centre_time=well2time, half_timewindow=half_timewindow, fs=sampling_rate,color='black')
-ax.axvline(x=2, color='red', linestyle='--', label='Event Time')
+ax.axvline(x=0, color='red', linestyle='--', label='Event Time')
 
 fig = plt.figure(figsize=(16, 5))
 ax1 = fig.add_subplot(211)
 fp.PETH_plot_zscore(ax1, signal_sync,centre_time=well2time, half_timewindow=half_timewindow, fs=sampling_rate,color='blue')
-ax1.axvline(x=2, color='red', linestyle='--', label='Event Time')
+ax1.axvline(x=0, color='red', linestyle='--', label='Event Time')
 ax2 = fig.add_subplot(212)
 fp.PETH_plot_zscore(ax2, reference_sync,centre_time=well2time, half_timewindow=half_timewindow, fs=sampling_rate,color='purple')
-ax2.axvline(x=2, color='red', linestyle='--', label='Event Time')
+ax2.axvline(x=0, color='red', linestyle='--', label='Event Time')
