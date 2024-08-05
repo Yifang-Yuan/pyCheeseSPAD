@@ -202,7 +202,7 @@ class pyCheeseSession:
         py_target_string='py'
         files = os.listdir(self.pySBFolder)
         filtered_files = [file for file in files if py_target_string in file]  
-        min_distance = int(1 * self.pyFs)  # Minimum distance in samples
+        min_distance = int(0.5 * self.pyFs)  # Minimum distance in samples
         for file in filtered_files:
             target_index = str('_tiral'.join(filter(str.isdigit, file)))[-1]
             print('Target_index: ',target_index)
@@ -210,7 +210,7 @@ class pyCheeseSession:
             raw_signal,raw_reference=fp.read_photometry_data (self.pySBFolder, file, readCamSync=False,plot=False,sampling_rate=130)
             zdFF = fp.get_zdFF(raw_reference,raw_signal,smooth_win=10,remove=0,lambd=5e4,porder=1,itermax=50) 
             time = np.linspace(0, len(zdFF)/self.pyFs, len(zdFF))
-            peaks, _ = signal.find_peaks(zdFF, distance=min_distance)  # Adjust height threshold as needed
+            peaks, _ = signal.find_peaks(zdFF, distance=min_distance,height=1)  # Adjust height threshold as needed
             # Extract the peak values
             zdff_peak_values = zdFF[peaks]
             # Calculate the average of the peak values

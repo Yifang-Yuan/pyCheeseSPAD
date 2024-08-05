@@ -11,10 +11,10 @@ import openpyxl
 import re
 import os
 
-input_folder = '/Users/zhumingshuai/Desktop/Programming/Data/example/'
+input_folder = 'D:/Mingshuai/output/1079&1081/'
 input_file = 'Training Data.xlsx'
 file_name_column = 'name'
-output_folder_prefix = '/Users/zhumingshuai/Desktop/Programming/Data/example/'
+output_folder_prefix = 'D:/Mingshuai/output/1079&1081/'
 output_file_prefix = 'Training_Data_Day'
 
 def ReadTrainingData (input_folder,input_file,file_name_column):

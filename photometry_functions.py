@@ -513,18 +513,3 @@ def Plot_multiple_PETH_different_window(df_py_cheese,before_window,after_window,
     plt.show()
     return event_window_traces
 
-def Read_Concat_pkl_files (folder, IndexNumFromFilename=-4):
-    dfs = []
-    for filename in os.listdir(folder):
-        if filename.endswith(".pkl"):
-            # Read the DataFrame from the .pkl file
-            df = pd.read_pickle(os.path.join(folder, filename))            
-            # Extract an index from the file name (you may need to customize this)
-            index = filename.split('.')[0] [IndexNumFromFilename:] # Assuming the file names are like "1.pkl", "2.pkl", etc.            
-            # Rename the columns with the extracted index
-            df.columns = [f'{index}_{col}' for col in df.columns]            
-            # Append the DataFrame to the list
-            dfs.append(df)   
-    # Concatenate the DataFrames column-wise
-    result_df = pd.concat(dfs, axis=1)
-    return result_df

@@ -21,4 +21,6 @@ session1=pyCheeseSession.pyCheeseSession(pyFolder,COLD_folder,COLD_filename,
 before_window=5
 after_window=5
 event_window_traces=session1.Plot_multiple_PETH_different_window(before_window,after_window)
+
 #%%
+py_cheese_df=session1.cheese_df

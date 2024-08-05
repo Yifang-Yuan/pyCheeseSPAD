@@ -44,7 +44,7 @@ event_window_traces.to_pickle(os.path.join(folder, filename))
 ''' you need to put all the PETH files with the same half window in the same folder '''
 folder_for_all='C:/Users/yifan/Downloads/1665 TrainingD4/'
 
-PSTH_collection=fp.Read_Concat_pkl_files(folder_for_all, IndexNumFromFilename=-4)
+PSTH_collection=fp.Read_Concat_pkl_files(folder_for_all, IndexNumFromFilename=-4) #THIS FUNCTION HAS BEEN CHANGED 
 
 filtered_columns = [col for col in PSTH_collection.columns if col.endswith('_1')]
 Well1_PETH = PSTH_collection[filtered_columns]
