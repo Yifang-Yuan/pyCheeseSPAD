@@ -16,6 +16,7 @@ import photometry_functions as fp
 import os
 import re
 import scipy.signal as signal
+import pickle
 
 class pyCheeseSession:
     def __init__(self, pyFolder,CheeseFolder,COLD_filename,save_folder,animalID='mice1',SessionID='Day1',pySBFolder=None):
@@ -41,6 +42,9 @@ class pyCheeseSession:
         self.save_folder=save_folder
         self.sort_py_files(self.pyFolder)
         self.form_pyCheesed_data_to_pandas()
+        self.result_path = os.path.join(self.save_folder, 'results')
+        if not os.path.exists(self.result_path):
+            os.makedirs(self.result_path)
         if not pySBFolder==None:
             self.pySBFolder=pySBFolder
             self.sort_py_files(self.pySBFolder)
@@ -81,7 +85,6 @@ class pyCheeseSession:
         else:
             print("Files are already sorted and renamed correctly.")
         return -1
-
     
     def form_pyCheesed_data_to_pandas(self):
         py_target_string='py'
@@ -134,10 +137,6 @@ class pyCheeseSession:
         selected_columns = [col_name for col_name in self.photometry_df.columns if col_name.startswith('pyData') and col_name[6:].isdigit()]
         column_numbers = [int(col_name.replace('pyData', '')) for col_name in selected_columns]  
         event_time = 0 
-        
-        result_path = os.path.join(self.save_folder, 'results')
-        if not os.path.exists(result_path):
-            os.makedirs(result_path)
             
         '''This is to make a figure and plot all PETH traces on the same figure'''
         fig = plt.figure(figsize=(10, 6))
@@ -167,7 +166,7 @@ class pyCheeseSession:
         plt.xlabel('Time (second)')
         plt.ylabel('Value')
         plt.title('Single Calcium traces while reaching well1 (green) and well2 (red) '+self.animalID)
-        output_path = os.path.join(result_path, self.animalID+self.SessionID+str(before_window)+'sec_window_reward_single.png')
+        output_path = os.path.join(self.result_path, self.animalID+self.SessionID+str(before_window)+'sec_window_reward_single.png')
         fig.savefig(output_path, bbox_inches='tight', pad_inches=0, transparent=True)
         #plt.legend()
         main_signal = event_window_traces.mean(axis=1)
@@ -190,13 +189,13 @@ class pyCheeseSession:
         plt.title('Mean Signal with Standard Deviation '+self.animalID)
         ax.legend()
         plt.show()
-        output_path = os.path.join(result_path, self.animalID+'_'+self.SessionID+'_'+str(before_window)+'sec_window_reward_mean_std.png')
+        output_path = os.path.join(self.result_path, self.animalID+'_'+self.SessionID+'_'+str(before_window)+'sec_window_reward_mean_std.png')
         fig.savefig(output_path, bbox_inches='tight', pad_inches=0, transparent=True)
         
         '''save the pkl file for the PETH data with half window time specified'''
         filename=self.animalID+'_'+self.SessionID+'_'+str(before_window)+'sec_win_traces.pkl'
         self.event_window_traces=event_window_traces
-        self.event_window_traces.to_pickle(os.path.join(result_path, filename))
+        self.event_window_traces.to_pickle(os.path.join(self.result_path, filename))
         return self.event_window_traces
     
     def find_peaks_in_SBtrials (self):
@@ -218,7 +217,21 @@ class pyCheeseSession:
             average_peak_value = np.mean(zdff_peak_values)
             num_peaks = len(peaks)
             zdff_max = np.max(zdFF)
-            print("Average peak value:", average_peak_value)
+            print("Average peak value:", average_peak_value)            
+            # Construct the dictionary
+            results_dict = {
+                'zdff_peak_values': zdff_peak_values,
+                'average_peak_value': average_peak_value,
+                'num_peaks': num_peaks,
+                'zdff_max': zdff_max
+            }
+            # Save the dictionary to a pickle file
+            pkl_filename = f'SB_peak_{self.animalID}_{self.SessionID}_trial{target_index}.pkl'
+            pkl_filepath = os.path.join(self.result_path, pkl_filename)
+            
+            with open(pkl_filepath, 'wb') as pkl_file:
+                pickle.dump(results_dict, pkl_file)
+                
             plt.figure(figsize=(10, 3))
             plt.plot(time, zdFF, label='Signal Trace')
             plt.plot(time[peaks], zdFF[peaks], 'rx', label='Peaks')
@@ -226,6 +239,5 @@ class pyCheeseSession:
             plt.ylabel('Amplitude')
             plt.title('Signal Trace with Peaks Labeled')
             plt.legend()
-            plt.grid(True)
             plt.show()
-        return zdff_peak_values,average_peak_value,num_peaks, zdff_max
+        return -1
