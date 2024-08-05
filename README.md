@@ -17,12 +17,12 @@ For two samples in `pyPhotometrySampleData`, they are recorded an anaesthetised 
 ![image](https://github.com/user-attachments/assets/aebf2bc2-d209-458f-a406-f83dae1e11b6)
 
 ## Cheeseboard task with photometry recording
-A prerequisition is COLD pipeline (Daniel Lewis-Fallows,2024maybe) to process cheeseboard behavioural data. The output is .xlxs files that will be read in this part of analysis.
+A prerequisition is COLD pipeline (Daniel Lewis-Fallows,2024maybe) to process cheeseboard behavioural data. The output are .xlxs files that will be read in this part of analysis.
 Example data structure of COLD output:
 
 ![image](https://github.com/user-attachments/assets/ff561104-9c71-4527-815f-6b0f532a63e5)
 
-`Rename_Training_data.py` can be used to separate a full COLD output table to separate files for each day (developped by Mingshuai Zhu).
+`Rename_Training_data.py` can be used to separate a full COLD output table to separate files to different animals and each single day for a more convenient IO (developped by Mingshuai Zhu).
 
 ![image](https://github.com/user-attachments/assets/85fc1a87-3054-401a-9b94-0c2da75be742)
 
