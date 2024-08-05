@@ -180,8 +180,8 @@ class pyCheeseSession:
         ax.axvline(x=event_time, color='red', linestyle='--', label='Event Time')
         ax.set_xlabel('Time (second)')
         ax.set_ylabel('Value')
-        ax.spines['left'].set_visible(False)
-        ax.spines['bottom'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
         plt.title('Mean Signal with Standard Deviation '+self.animalID)
         ax.legend()
         plt.show()
@@ -189,7 +189,7 @@ class pyCheeseSession:
         fig.savefig(output_path, bbox_inches='tight', pad_inches=0, transparent=True)
         
         '''save the pkl file for the PETH data with half window time specified'''
-        filename=self.animalID+self.SessionID+str(before_window)+'sec_win_traces.pkl'
+        filename=self.animalID+'_'+self.SessionID+'_'+str(before_window)+'sec_win_traces.pkl'
         self.event_window_traces=event_window_traces
         self.event_window_traces.to_pickle(os.path.join(result_path, filename))
         return self.event_window_traces
