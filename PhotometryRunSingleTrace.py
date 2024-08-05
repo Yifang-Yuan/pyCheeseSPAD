@@ -14,9 +14,9 @@ import photometry_functions as fp
 import os
 # Folder with your files
 #folder = 'C:/SPAD/pyPhotometry_v0.3.1/data/' # Modify it depending on where your file is located
-folder ='C:/SPAD/SPADData/20240214_Day3/SyncRecording10/'
+folder ='D:/CB_EC5aFibre/CB_EC5aFibre_1756072/1756072_day4/1756072SB/'
 # File name
-file_name = '1732333-2024-02-14-154153.csv'
+file_name = '1756072-2024-06-05-115532.csv'
 sampling_rate=130
 #%%
 '''Read csv file and calculate zscore of the fluorescent signal'''

@@ -15,9 +15,10 @@ import matplotlib.pyplot as plt
 import photometry_functions as fp
 import os
 import re
+import scipy.signal as signal
 
 class pyCheeseSession:
-    def __init__(self, pyFolder,CheeseFolder,COLD_filename,save_folder,animalID='mice1',SessionID='Day1'):
+    def __init__(self, pyFolder,CheeseFolder,COLD_filename,save_folder,animalID='mice1',SessionID='Day1',pySBFolder=None):
         '''
         Parameters
         ----------
@@ -38,15 +39,19 @@ class pyCheeseSession:
         self.SessionID=SessionID
         self.COLD_resultfilename=COLD_filename
         self.save_folder=save_folder
-        self.sort_py_files()
+        self.sort_py_files(self.pyFolder)
         self.form_pyCheesed_data_to_pandas()
+        if not pySBFolder==None:
+            self.pySBFolder=pySBFolder
+            self.sort_py_files(self.pySBFolder)
+            
         
-    def sort_py_files (self):
+    def sort_py_files (self,folder):
         original_pattern = re.compile(r'(\w+)-(\d{4}-\d{2}-\d{2}-\d{6})(\.csv)?$')
         renamed_pattern = re.compile(r'py_(\w+)-(\d{4}-\d{2}-\d{2}-\d{6})_(\d+)\.csv$')
         partially_renamed_pattern = re.compile(r'(\w+)-(\d{4}-\d{2}-\d{2}-\d{6})_(\d+)\.csv$')
         # List all files in the directory that match the patterns
-        files = [f for f in os.listdir(self.pyFolder) if original_pattern.match(f) or renamed_pattern.match(f) or partially_renamed_pattern.match(f)]
+        files = [f for f in os.listdir(folder) if original_pattern.match(f) or renamed_pattern.match(f) or partially_renamed_pattern.match(f)]
         
         # Extract timestamps and filenames into a list of tuples
         files_with_timestamps = [(original_pattern.match(f).group(2), f) if original_pattern.match(f) else 
@@ -66,8 +71,8 @@ class pyCheeseSession:
                 new_filename = f"py_{match.group(1)}-{match.group(2)}_{index}.csv"
                 
                 # Construct full file paths
-                old_filepath = os.path.join(self.pyFolder, filename)
-                new_filepath = os.path.join(self.pyFolder, new_filename)
+                old_filepath = os.path.join(folder, filename)
+                new_filepath = os.path.join(folder, new_filename)
                 
                 # Rename the file
                 os.rename(old_filepath, new_filepath)
@@ -90,9 +95,9 @@ class pyCheeseSession:
         for file in filtered_files:
             # Extract the last number from the file name
             target_index = str('_tiral'.join(filter(str.isdigit, file)))[-1]
-            print(target_index)
+            print('Target_index: ',target_index)
             # Read the CSV file with photometry read
-            raw_signal,raw_reference,Cam_Sync=fp.read_photometry_data (self.pyFolder, file, readCamSync='True',plot=False,sampling_rate=130)
+            raw_signal,raw_reference,Cam_Sync=fp.read_photometry_data (self.pyFolder, file, readCamSync=True,plot=False,sampling_rate=130)
             zdFF = fp.get_zdFF(raw_reference,raw_signal,smooth_win=10,remove=0,lambd=5e4,porder=1,itermax=50) 
             filtered_files_sync = [file for file in files if sync_target_string in file]
             for Sync_file in filtered_files_sync:
@@ -185,7 +190,7 @@ class pyCheeseSession:
         plt.title('Mean Signal with Standard Deviation '+self.animalID)
         ax.legend()
         plt.show()
-        output_path = os.path.join(result_path, self.animalID+self.SessionID+str(before_window)+'sec_window_reward_mean_std.png')
+        output_path = os.path.join(result_path, self.animalID+'_'+self.SessionID+'_'+str(before_window)+'sec_window_reward_mean_std.png')
         fig.savefig(output_path, bbox_inches='tight', pad_inches=0, transparent=True)
         
         '''save the pkl file for the PETH data with half window time specified'''
@@ -193,3 +198,34 @@ class pyCheeseSession:
         self.event_window_traces=event_window_traces
         self.event_window_traces.to_pickle(os.path.join(result_path, filename))
         return self.event_window_traces
+    
+    def find_peaks_in_SBtrials (self):
+        py_target_string='py'
+        files = os.listdir(self.pySBFolder)
+        filtered_files = [file for file in files if py_target_string in file]  
+        min_distance = int(1 * self.pyFs)  # Minimum distance in samples
+        for file in filtered_files:
+            target_index = str('_tiral'.join(filter(str.isdigit, file)))[-1]
+            print('Target_index: ',target_index)
+            # Read the CSV file with photometry read
+            raw_signal,raw_reference=fp.read_photometry_data (self.pySBFolder, file, readCamSync=False,plot=False,sampling_rate=130)
+            zdFF = fp.get_zdFF(raw_reference,raw_signal,smooth_win=10,remove=0,lambd=5e4,porder=1,itermax=50) 
+            time = np.linspace(0, len(zdFF)/self.pyFs, len(zdFF))
+            peaks, _ = signal.find_peaks(zdFF, distance=min_distance)  # Adjust height threshold as needed
+            # Extract the peak values
+            zdff_peak_values = zdFF[peaks]
+            # Calculate the average of the peak values
+            average_peak_value = np.mean(zdff_peak_values)
+            num_peaks = len(peaks)
+            zdff_max = np.max(zdFF)
+            print("Average peak value:", average_peak_value)
+            plt.figure(figsize=(10, 3))
+            plt.plot(time, zdFF, label='Signal Trace')
+            plt.plot(time[peaks], zdFF[peaks], 'rx', label='Peaks')
+            plt.xlabel('Time')
+            plt.ylabel('Amplitude')
+            plt.title('Signal Trace with Peaks Labeled')
+            plt.legend()
+            plt.grid(True)
+            plt.show()
+        return zdff_peak_values,average_peak_value,num_peaks, zdff_max
