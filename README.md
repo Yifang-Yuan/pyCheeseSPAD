@@ -22,18 +22,20 @@ Example data structure of COLD output:
 
 ![image](https://github.com/user-attachments/assets/ff561104-9c71-4527-815f-6b0f532a63e5)
 
+`Rename_Training_data.py` can be used to separate a full COLD output table to separate files for each day (developped by Mingshuai Zhu).
+
+![image](https://github.com/user-attachments/assets/85fc1a87-3054-401a-9b94-0c2da75be742)
+
+
 `pyCheeseSession.py` defines a Class of a session of cheeseboard task recording. 
 
 `pyCheese_main.py` is the main function to define the pyCheeseSession Class and do analysis, can be used for developing and testing.
 
 `pyCheeseBatch.py` will batch read multiple sessions of recording in a specific folder structure, and save PETH traces with a defined time window around reward collectoin, and data from start-box recording. 
 
-![image](https://github.com/user-attachments/assets/7d5dcfec-3265-42ec-b183-ce8e21209c40)
+![image](https://github.com/user-attachments/assets/b057f75e-b2b5-4c75-88e1-b7e3f4596502)
 
-
-
-
-#### Old testing files
+#### Testing files
 **NOTE**: These two files are used for testing and simple analysis, for batch analysis, use the method above.
 
 `pyCB_singleTrial_test.py` is only used to demonstrate synchronisation of behaviour and photometry data, and plot optical transient during collecting reward time for a single cheeseboard trial. It is not useful for averaging multiple trials or comparing across day sessions, etc. 
