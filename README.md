@@ -23,13 +23,19 @@ Example data structure of COLD output:
 
 ![image](https://github.com/user-attachments/assets/ff561104-9c71-4527-815f-6b0f532a63e5)
 
+#### old testing files
+**NOTE**: These two files are used for testing and simple analysis, for batch analysis, use the method above.
 `pyCheese_singleTrial.py` is only used to demonstrate synchronisation of behaviour and photometry data, and plot optical transient during collecting reward time for a single cheeseboard trial. It is not useful for averaging multiple trials or comparing across day sessions, etc. 
 Output example:
 
 ![image](https://github.com/user-attachments/assets/899a678b-b66d-427c-ab4b-e442660b681a)
 
-`pyCheese_multiTrial.py` photometry data analysis for a day session with multiple training trials. 
-NOTE: These two files are designed for a specific experiment, you do not need them to perform other pyPhotometry related analysis.
+`pyCheese_multiTrial.py` photometry data analysis for a day session with multiple training trials.
+
+![image](https://github.com/user-attachments/assets/1c5757cc-f5ba-4a7d-ba7f-0613d6adc57f)
+![image](https://github.com/user-attachments/assets/1bab9089-f75a-4469-b8d6-99262ba764ea)
+
+
 
 ## SPAD-SPC imager data processing
 More information about the SPC imager can be found in the README of this repository: 
