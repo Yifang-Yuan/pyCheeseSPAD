@@ -6,11 +6,11 @@ Created on Sun Aug  4 15:56:27 2024
 """
 import pyCheeseSession
 #%%
-pyFolder='G:/CB_EC5aFibre/CB_EC5aFibre_1756072/1756072_day4/1756072CB/'
-COLD_folder='G:/CB_EC5aFibre/CB_EC5aFibre_1756072/workingfolder/'
+pyFolder='D:/CB_EC5aFibre/CB_EC5aFibre_1756072/1756072_day4/1756072CB/'
+COLD_folder='D:/CB_EC5aFibre/CB_EC5aFibre_1756072/workingfolder/'
 # Set your parameters
 COLD_filename='Training Data_Day4.xlsx'
-save_folder='G:/CB_EC5aFibre/CB_EC5aFibre_1756072/'
+save_folder='D:/CB_EC5aFibre/CB_EC5aFibre_1756072/'
 session1=pyCheeseSession.pyCheeseSession(pyFolder,COLD_folder,COLD_filename,save_folder,animalID='1756072',SessionID='Day4')
 #%%
 before_window=5
