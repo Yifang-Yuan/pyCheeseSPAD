@@ -24,6 +24,7 @@ Example data structure of COLD output:
 
 #### old testing files
 **NOTE**: These two files are used for testing and simple analysis, for batch analysis, use the method above.
+
 `pyCheese_singleTrial_test.py` is only used to demonstrate synchronisation of behaviour and photometry data, and plot optical transient during collecting reward time for a single cheeseboard trial. It is not useful for averaging multiple trials or comparing across day sessions, etc. 
 
 `pyCheese_multiTrial_test.py` photometry data analysis for a day session with multiple training trials.
