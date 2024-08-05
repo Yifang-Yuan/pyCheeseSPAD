@@ -28,7 +28,9 @@ Example data structure of COLD output:
 
 `pyCheeseBatch.py` will batch read multiple sessions of recording in a specific folder structure, and save PETH traces with a defined time window around reward collectoin, and data from start-box recording. 
 
-![image](https://github.com/user-attachments/assets/bfa3e8e6-25fe-4d7f-9f7c-140daad4720d)
+![image](https://github.com/user-attachments/assets/7d5dcfec-3265-42ec-b183-ce8e21209c40)
+
+
 
 
 #### Old testing files
