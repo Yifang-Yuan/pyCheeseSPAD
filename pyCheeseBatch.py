@@ -66,9 +66,9 @@ def plot_2wells_PETH_all_trials (result_folder):
 #%%
 'This is to call the above function to read all sessions in multiple days for an animal'
 total_days=5
-parent_folder='D:/CB_EC5aFibre/CB_EC5aFibre_1756072/'
-save_folder='D:/CB_EC5aFibre/CB_EC5aFibre_1756072/'
-COLD_folder='D:/CB_EC5aFibre/CB_EC5aFibre_1756072/workingfolder/'
+parent_folder='E:/CB_EC5aFibre_1756072/'
+save_folder='E:/CB_EC5aFibre_1756072/'
+COLD_folder='E:/CB_EC5aFibre_1756072/COLD_folder/'
 animalID='1756072'
 before_window=5
 after_window=5

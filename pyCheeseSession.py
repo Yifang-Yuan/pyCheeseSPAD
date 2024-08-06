@@ -98,15 +98,20 @@ class pyCheeseSession:
         for file in filtered_files:
             # Extract the last number from the file name
             target_index = str('_tiral'.join(filter(str.isdigit, file)))[-1]
+            match = re.search(r'_(\d+)\.csv$', file)
+            if match:
+                target_index= match.group(1)
             print('Target_index: ',target_index)
             # Read the CSV file with photometry read
             raw_signal,raw_reference,Cam_Sync=fp.read_photometry_data (self.pyFolder, file, readCamSync=True,plot=False,sampling_rate=130)
             zdFF = fp.get_zdFF(raw_reference,raw_signal,smooth_win=10,remove=0,lambd=5e4,porder=1,itermax=50) 
             filtered_files_sync = [file for file in files if sync_target_string in file]
             for Sync_file in filtered_files_sync:
-                last_number = str(''.join(filter(str.isdigit, Sync_file)))[-1]            
-                if last_number is target_index:
-                    print(Sync_file+last_number)
+                match_sync = re.search(r'sync_(\d+)\.csv$', Sync_file)
+                if match_sync:
+                    sync_index= match_sync.group(1)
+                if sync_index == target_index:
+                    print(Sync_file)
                     CamSync_LED=fp.read_Bonsai_Sync (self.pyFolder,Sync_file,plot=False)
                     zscore_sync,Sync_index_inCam,Sync_Start_time=fp.sync_photometry_Cam(zdFF,Cam_Sync,CamSync_LED,CamFs=self.CamFs)
                     zscore_series=pd.Series(zscore_sync)
@@ -135,6 +140,7 @@ class pyCheeseSession:
     def Plot_multiple_PETH_different_window(self,before_window,after_window):
         event_window_traces = pd.DataFrame([])
         selected_columns = [col_name for col_name in self.photometry_df.columns if col_name.startswith('pyData') and col_name[6:].isdigit()]
+        print (selected_columns)
         column_numbers = [int(col_name.replace('pyData', '')) for col_name in selected_columns]  
         event_time = 0 
         '''This is to make a figure and plot all PETH traces on the same figure'''
@@ -202,8 +208,6 @@ class pyCheeseSession:
         py_signal = self.photometry_df[f'pyData{trialIdx}']
         well1time=self.cheese_df[f'well1time{trialIdx}'][0]
         well2time=self.cheese_df[f'well2time{trialIdx}'][0]
-        print ('well1time',well1time)
-        print ('well2time',well2time)
         event_time1 = 0
         event_time2 =well2time-well1time
         
