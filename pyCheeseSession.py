@@ -137,7 +137,6 @@ class pyCheeseSession:
         selected_columns = [col_name for col_name in self.photometry_df.columns if col_name.startswith('pyData') and col_name[6:].isdigit()]
         column_numbers = [int(col_name.replace('pyData', '')) for col_name in selected_columns]  
         event_time = 0 
-            
         '''This is to make a figure and plot all PETH traces on the same figure'''
         fig = plt.figure(figsize=(10, 6))
         ax = fig.add_subplot(111)
@@ -198,24 +197,31 @@ class pyCheeseSession:
         self.event_window_traces.to_pickle(os.path.join(self.result_path, filename))
         return self.event_window_traces
     
-    def plot_single_trial_2_rewards_PETH(self,event_window_traces, trialIdx,timediff,before_window, after_window, animalID, meancolor='blue', stdcolor='lightblue', ax=None):
+    def plot_single_trial_2_rewards_PETH(self, trialIdx,before_well1_window, after_well2_window, color='blue', ax=None):
         'NEED TO MODIFY'
-        signal = event_window_traces.filter(regex=str(trialIdx)+'_1$', axis=1)
+        py_signal = self.photometry_df[f'pyData{trialIdx}']
+        well1time=self.cheese_df[f'well1time{trialIdx}'][0]
+        well2time=self.cheese_df[f'well2time{trialIdx}'][0]
+        print ('well1time',well1time)
+        print ('well2time',well2time)
         event_time1 = 0
-        event_time2 =timediff
-        num_samples = len(signal)
-        time_in_seconds = np.linspace(-before_window, after_window, num_samples)
-
+        event_time2 =well2time-well1time
+        
+        start_idx=int((well1time-before_well1_window)*self.pyFs)
+        end_idx=int((well2time+after_well2_window)*self.pyFs)
+        
+        py_signal_PETH=py_signal[start_idx:end_idx].reset_index(drop=True)
+        num_samples = len(py_signal_PETH)
+        time_in_seconds = np.linspace(-before_well1_window, event_time2+after_well2_window, num_samples)
         # If an 'ax' is provided, use it for plotting; otherwise, create a new figure and axis
         if ax is None:
-            fig, ax = plt.subplots(figsize=(10, 6))
-
-        ax.plot(time_in_seconds, signal, label='Mean Signal', color=meancolor,linewidth=0.5)
+            fig, ax = plt.subplots(figsize=(10, 4))
+        ax.plot(time_in_seconds, py_signal_PETH, label='Optical Signal', color=color,linewidth=0.5)
         ax.axvline(x=event_time1, color='green', linestyle='--', label='Well1 Time')
         ax.axvline(x=event_time2, color='red', linestyle='--', label='Well2 Time')
         ax.set_xlabel('Time (second)')
         ax.set_ylabel('Value')
-        ax.set_title('Mean Signal with Standard Deviation ' + animalID)
+        ax.set_title('Optical trace when collecting 2 reward ' + self.animalID)
         # If 'ax' was provided, do not call plt.show() to allow the caller to display or save the figure as needed
         if ax is None:
             plt.show()
