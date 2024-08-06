@@ -76,5 +76,5 @@ Read_MultiDays_Save_CB_SB_results (total_days,parent_folder,save_folder,COLD_fol
 #%%
 '''plot well1 and well2 average PETH for all sessions'''
 ''' you need to put all the PETH files with the same half window in the same folder '''
-result_folder='D:/CB_EC5aFibre/CB_EC5aFibre_1756072/results/'
+result_folder='E:/CB_EC5aFibre_1756072/results/'
 Well1_PETH,Well2_PETH=plot_2wells_PETH_all_trials (result_folder)

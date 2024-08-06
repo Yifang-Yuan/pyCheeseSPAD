@@ -297,11 +297,14 @@ def adjust_time_to_photometry(cheeaseboard_session_data,trial_index,Sync_Start_t
     well1time_COLD=cheeaseboard_session_data['well1time_s'][trial_index]
     well2time_COLD=cheeaseboard_session_data['well2time_s'][trial_index]
     entertime=startingtime_COLD-Sync_Start_time
-    well1time=(well1time_COLD+startingtime_COLD)-Sync_Start_time
-    well2time=(well2time_COLD+startingtime_COLD)-Sync_Start_time
-    print ('startingtime_py', entertime)
-    print ('well1time_py', well1time)
-    print ('well2time_py', well2time)
+    if not well1time_COLD==120:
+        well1time=(well1time_COLD+startingtime_COLD)-Sync_Start_time
+    else:
+        well1time=float('nan')
+    if not well2time_COLD==120:    
+        well2time=(well2time_COLD+startingtime_COLD)-Sync_Start_time
+    else:
+        wel21time=float('nan')
     return entertime, well1time, well2time
 
 def PETH_plot_zscore(ax, zscore_sync,centre_time, half_timewindow, fs,color,Label='zscore'):

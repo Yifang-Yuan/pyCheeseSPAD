@@ -208,11 +208,22 @@ class pyCheeseSession:
         py_signal = self.photometry_df[f'pyData{trialIdx}']
         well1time=self.cheese_df[f'well1time{trialIdx}'][0]
         well2time=self.cheese_df[f'well2time{trialIdx}'][0]
-        event_time1 = 0
-        event_time2 =well2time-well1time
-        
-        start_idx=int((well1time-before_well1_window)*self.pyFs)
-        end_idx=int((well2time+after_well2_window)*self.pyFs)
+        if not np.isnan(well1time):
+            start_idx=int((well1time-before_well1_window)*self.pyFs)
+            event_time1 = 0
+            print ('start_idx',start_idx)
+            if not np.isnan(well2time):
+                end_idx=int((well2time+after_well2_window)*self.pyFs)
+                event_time2 =well2time-well1time
+                print ('end_idx',end_idx)
+            else:
+                print ('Animal did not find the 2nd reward')
+                end_idx=int((well1time+after_well2_window)*self.pyFs)
+                event_time2 =0
+                print ('end_idx',end_idx)
+        else:
+            print ('Animal found neither rewards')
+            return -1
         
         py_signal_PETH=py_signal[start_idx:end_idx].reset_index(drop=True)
         num_samples = len(py_signal_PETH)
