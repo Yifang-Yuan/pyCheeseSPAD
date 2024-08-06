@@ -29,7 +29,8 @@ cheese_df=session1.cheese_df
 #%%
 '''choose the trial index you want to plot, this is the trial num that you have photometry recordings.
 You can check Well1PETH variable for the index'''
-singleTrial_index=9
-before_well1_window=5
-after_well2_window=5
-session1.plot_single_trial_2_rewards_PETH(singleTrial_index,before_well1_window, after_well2_window, color='blue', ax=None)
+for i in range(12):
+    singleTrial_index=i
+    before_well1_window=5
+    after_well2_window=5
+    session1.plot_single_trial_2_rewards_PETH(singleTrial_index,before_well1_window, after_well2_window, color='blue', ax=None)

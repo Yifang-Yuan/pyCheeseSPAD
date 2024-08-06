@@ -242,7 +242,6 @@ class pyCheeseSession:
             plt.show()
         return ax
 
-
     def find_peaks_in_SBtrials (self):
         py_target_string='py'
         files = os.listdir(self.pySBFolder)
