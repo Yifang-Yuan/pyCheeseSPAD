@@ -18,6 +18,7 @@ SessionID='Day4'
 session1=pyCheeseSession.pyCheeseSession(pyFolder,COLD_folder,COLD_filename,
                                          save_folder,animalID=animalID,SessionID=SessionID,pySBFolder=pySBFolder)
 #%%
+'This will plot the average of all collecting reward PETH'
 before_window=5
 after_window=5
 event_window_traces=session1.Plot_multiple_PETH_different_window(before_window,after_window)
@@ -31,5 +32,4 @@ You can check Well1PETH variable for the index'''
 singleTrial_index=9
 before_well1_window=5
 after_well2_window=5
-
 session1.plot_single_trial_2_rewards_PETH(singleTrial_index,before_well1_window, after_well2_window, color='blue', ax=None)
