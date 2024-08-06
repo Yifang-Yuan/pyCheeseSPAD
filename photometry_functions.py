@@ -349,28 +349,6 @@ def Plot_mean_With_Std_PSTH(event_window_traces, before_window, after_window, an
         plt.show()
     return ax
 
-def Plot_single_trial_PSTH(event_window_traces, trialIdx,timediff,before_window, after_window, animalID, meancolor='blue', stdcolor='lightblue', ax=None):
-    signal = event_window_traces.filter(regex=str(trialIdx)+'_1$', axis=1)
-    event_time1 = 0
-    event_time2 =timediff
-    num_samples = len(signal)
-    time_in_seconds = np.linspace(-before_window, after_window, num_samples)
-
-    # If an 'ax' is provided, use it for plotting; otherwise, create a new figure and axis
-    if ax is None:
-        fig, ax = plt.subplots(figsize=(10, 6))
-
-    ax.plot(time_in_seconds, signal, label='Mean Signal', color=meancolor,linewidth=0.5)
-    ax.axvline(x=event_time1, color='green', linestyle='--', label='Well1 Time')
-    ax.axvline(x=event_time2, color='red', linestyle='--', label='Well2 Time')
-    ax.set_xlabel('Time (second)')
-    ax.set_ylabel('Value')
-    ax.set_title('Mean Signal with Standard Deviation ' + animalID)
-    # If 'ax' was provided, do not call plt.show() to allow the caller to display or save the figure as needed
-    if ax is None:
-        plt.show()
-    return ax
-
 def read_all_photometry_files(folder_path, py_target_string,sync_target_string,CamFs,pyFs,COLD_folder,COLD_filename):
     files = os.listdir(folder_path)
     filtered_files = [file for file in files if py_target_string in file]  
