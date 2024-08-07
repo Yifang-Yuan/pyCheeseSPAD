@@ -97,7 +97,6 @@ class pyCheeseSession:
         cheese_df=pd.DataFrame([])
         for file in filtered_files:
             # Extract the last number from the file name
-            target_index = str('_tiral'.join(filter(str.isdigit, file)))[-1]
             match = re.search(r'_(\d+)\.csv$', file)
             if match:
                 target_index= match.group(1)
@@ -248,7 +247,9 @@ class pyCheeseSession:
         filtered_files = [file for file in files if py_target_string in file]  
         min_distance = int(0.5 * self.pyFs)  # Minimum distance in samples
         for file in filtered_files:
-            target_index = str('_tiral'.join(filter(str.isdigit, file)))[-1]
+            match = re.search(r'_(\d+)\.csv$', file)
+            if match:
+                target_index= match.group(1)
             print('Target_index: ',target_index)
             # Read the CSV file with photometry read
             raw_signal,raw_reference=fp.read_photometry_data (self.pySBFolder, file, readCamSync=False,plot=False,sampling_rate=130)
