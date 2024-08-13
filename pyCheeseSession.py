@@ -157,6 +157,9 @@ class pyCheeseSession:
                 fp.PETH_plot_zscore_diff_window(ax, self.photometry_df[f'pyData{col_num}'],centre_time=
                                  self.cheese_df[f'well1time{col_num}'][0], before_window=before_window,
                                  after_window=after_window, fs=self.pyFs,color='green',Label=f'Trace{col_num+1} Well1time')
+            else:
+                length=(before_window+after_window)*self.pyFs
+                event_window_traces[f'pyData{col_num}'+'_1']=pd.Series(np.nan, index=range(length))
             column_well2time=self.cheese_df[f'well2time{col_num}'][0]
             if not np.isnan(column_well2time).any():
                 start_idx=int((column_well2time-before_window)*self.pyFs)
@@ -166,6 +169,9 @@ class pyCheeseSession:
                 fp.PETH_plot_zscore_diff_window(ax, self.photometry_df[f'pyData{col_num}'],centre_time=
                                  self.cheese_df[f'well2time{col_num}'][0], before_window=before_window,
                                  after_window=after_window, fs=self.pyFs,color='red',Label=f'Trace{col_num+1} Well2time')
+            else:
+                length=(before_window+after_window)*self.pyFs
+                event_window_traces[f'pyData{col_num}'+'_2']=pd.Series(np.nan, index=range(length))
         ax.axvline(x=0, color='red', linestyle='--', label='Event Time') 
         plt.xlabel('Time (second)')
         plt.ylabel('Value')
@@ -261,6 +267,7 @@ class pyCheeseSession:
             # Calculate the average of the peak values
             average_peak_value = np.mean(zdff_peak_values)
             num_peaks = len(peaks)
+            peak_freq = num_peaks/(len(zdFF)/self.pyFs) #number of peak per seconds
             zdff_max = np.max(zdFF)
             print("Average peak value:", average_peak_value)            
             # Construct the dictionary
@@ -268,7 +275,8 @@ class pyCheeseSession:
                 'zdff_peak_values': zdff_peak_values,
                 'average_peak_value': average_peak_value,
                 'num_peaks': num_peaks,
-                'zdff_max': zdff_max
+                'zdff_max': zdff_max,
+                'peak_freq':peak_freq
             }
             # Save the dictionary to a pickle file
             pkl_filename = f'SB_peak_{self.animalID}_{self.SessionID}_trial{target_index}.pkl'

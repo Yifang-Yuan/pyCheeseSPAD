@@ -304,7 +304,7 @@ def adjust_time_to_photometry(cheeaseboard_session_data,trial_index,Sync_Start_t
     if not well2time_COLD==120:    
         well2time=(well2time_COLD+startingtime_COLD)-Sync_Start_time
     else:
-        wel21time=float('nan')
+        well2time=float('nan')
     return entertime, well1time, well2time
 
 def PETH_plot_zscore(ax, zscore_sync,centre_time, half_timewindow, fs,color,Label='zscore'):

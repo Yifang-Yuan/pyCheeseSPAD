@@ -66,15 +66,15 @@ def plot_2wells_PETH_all_trials (result_folder):
 #%%
 'This is to call the above function to read all sessions in multiple days for an animal'
 total_days=5
-parent_folder='E:/CB_EC5aFibre_1756072/'
-save_folder='E:/CB_EC5aFibre_1756072/'
-COLD_folder='E:/CB_EC5aFibre_1756072/COLD_folder/'
-animalID='1756072'
+parent_folder='D:/CB_EC5aFibre/CB_EC5aFibre_1721126/'
+save_folder='D:/CB_EC5aFibre/CB_EC5aFibre_1721126/'
+COLD_folder='D:/CB_EC5aFibre/CB_EC5aFibre_1721126/workingfolder/'
+animalID='1721126'
 before_window=5
 after_window=5
-Read_MultiDays_Save_CB_SB_results (total_days,parent_folder,save_folder,COLD_folder,animalID,before_window,after_window)
+Read_MultiDays_Save_CB_SB_results (total_days,parent_folder,save_folder,COLD_folder,animalID,before_window,after_window,SB=False)
 #%%
 '''plot well1 and well2 average PETH for all sessions'''
 ''' you need to put all the PETH files with the same half window in the same folder '''
-result_folder='E:/CB_EC5aFibre_1756072/results/'
+result_folder='E:/CB_EC5aFibre_1756074/results/'
 Well1_PETH,Well2_PETH=plot_2wells_PETH_all_trials (result_folder)
