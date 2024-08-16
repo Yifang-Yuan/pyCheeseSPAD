@@ -8,16 +8,7 @@ Created on Wed Aug  7 11:44:04 2024
 
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Aug  5 17:33:37 2024
 
-@author: zhumingshuai
-"""
-
-folder = '/Users/zhumingshuai/Desktop/Programming/Data/Example/1756072/'
-output_folder = '/Users/zhumingshuai/Desktop/Programming/Data/Example/1756072/output/'
-COLD_filename = 'Training_Data_Day1.xlsx'
-pickle_filename = '1756072_Day1_5sec_win_traces.pkl'
 
 import matplotlib.pyplot as plt
 import photometry_functions as fp
@@ -322,10 +313,11 @@ def PlotRouteScoreGraph (cold_folder, cold_filename, pickle_folder, pickle_filen
                 files[day-1][1] = filename
     for filename in os.listdir(cold_folder):
         if filename.endswith('.xlsx'):
-            day = re.findall(r'\d+', filename.split('Day')[1])
-            day = day[0]
-            day = int(day)
-            files[day-1][0] = filename
+            if 'Day' in filename:
+                day = re.findall(r'\d+', filename.split('Day')[1])
+                day = day[0]
+                day = int(day)
+                files[day-1][0] = filename
     total_route_score_array = []
     
     for i in range (len(files)):
@@ -466,7 +458,15 @@ def PlotRouteScoreGraph (cold_folder, cold_filename, pickle_folder, pickle_filen
 
     
 #%%
-# PlotRouteScoreGraph(folder, COLD_filename, folder, pickle_filename, output_folder,percentile=5)
+COLD_filename = 'Training_Data_Day1.xlsx'   #not using though
+pickle_filename = '1756072_Day1_5sec_win_traces.pkl'  #not using though
+
+
+output_folder='F:/CB_EC5aFibre_1756072/correlationResults/'
+pickle_folder='F:/CB_EC5aFibre_1756072/results/'
+COLD_folder='F:/CB_EC5aFibre_1756072/COLD_folder/'
+animalID='1756072'
+PlotRouteScoreGraph(COLD_folder, COLD_filename, pickle_folder, pickle_filename, output_folder,percentile=5)
 
 
 
