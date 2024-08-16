@@ -343,12 +343,12 @@ def Plot_mean_With_CI_PSTH(event_window_traces, before_window, after_window, ani
         fig, ax = plt.subplots(figsize=(10, 6))
 
     ax.plot(time_in_seconds, mean_signal, label='Mean Signal', color=meancolor,linewidth=1)
-    #ax.fill_between(time_in_seconds, mean_signal - moe, mean_signal + moe, color=stdcolor, alpha=0.5, label='95% CI')
+    ax.fill_between(time_in_seconds, mean_signal - moe, mean_signal + moe, color=stdcolor, alpha=0.5, label='95% CI')
     print (mean_signal - moe)
     ax.axvline(x=event_time, color='red', linestyle='--', label='Event Time')
     ax.set_xlabel('Time (second)')
     ax.set_ylabel('Value')
-    ax.set_title('Mean Signal with Standard Deviation ' + animalID)
+    ax.set_title('Mean Signal with CI ' + animalID)
     #ax.legend()
 
     # If 'ax' was provided, do not call plt.show() to allow the caller to display or save the figure as needed
