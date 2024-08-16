@@ -56,12 +56,15 @@ def plot_2wells_PETH_all_trials (result_folder):
     '''plot'''
     fig, ax = plt.subplots(figsize=(10, 4))
     fp.Plot_mean_With_Std_PSTH(Well1_PETH, before_window, after_window, animalID, meancolor='green', stdcolor='lightgreen', ax=ax)
+    fp.Plot_mean_With_CI_PSTH(Well1_PETH, before_window, after_window, animalID, meancolor='green', stdcolor='lightgreen', ax=ax)
 
     fig, ax = plt.subplots(figsize=(10, 4))
     fp.Plot_mean_With_Std_PSTH(Well2_PETH, before_window, after_window, animalID, meancolor='red', stdcolor='lightcoral', ax=ax)
+    fp.Plot_mean_With_CI_PSTH(Well2_PETH, before_window, after_window, animalID, meancolor='red', stdcolor='lightcoral', ax=ax)
 
     fig, ax = plt.subplots(figsize=(10, 4))
     fp.Plot_mean_With_Std_PSTH(PSTH_collection, before_window, after_window, animalID, meancolor='blue', stdcolor='lightblue', ax=ax)
+    fp.Plot_mean_With_CI_PSTH(PSTH_collection, before_window, after_window, animalID, meancolor='blue', stdcolor='lightblue', ax=ax)
     return Well1_PETH,Well2_PETH
 
 def plot_day_average_PETH_together(result_folder):
@@ -71,16 +74,48 @@ def plot_day_average_PETH_together(result_folder):
 #%%
 'This is to call the above function to read all sessions in multiple days for an animal'
 total_days=5
+<<<<<<< HEAD
 parent_folder='E:/CB_EC5aFibre/CB_EC5aFibre_1746062/'
 save_folder='E:/CB_EC5aFibre/CB_EC5aFibre_1746062/'
 COLD_folder='E:/CB_EC5aFibre/CB_EC5aFibre_1746062/workingfolder/'
 animalID='1746062'
+=======
+parent_folder='F:/CB_EC5aFibre_1756072/'
+save_folder='F:/CB_EC5aFibre_1756072/'
+COLD_folder='F:/CB_EC5aFibre_1756072/COLD_folder/'
+animalID='1756072'
+
+>>>>>>> 4d7105db09b3d753863b1964bd17d7c43ab999c1
 before_window=5
 after_window=5
 Read_MultiDays_Save_CB_SB_results (total_days,parent_folder,save_folder,COLD_folder,animalID,before_window,after_window,SB=False)
 #%%
 '''plot well1 and well2 average PETH for all sessions'''
 ''' you need to put all the PETH files with the same half window in the same folder '''
+<<<<<<< HEAD
 result_folder='E:/CB_EC5aFibre/CB_EC5aFibre_1756072/results/'
 Well1_PETH,Well2_PETH=plot_2wells_PETH_all_trials (result_folder)
 #%%
+=======
+result_folder='F:/CB_EC5aFibre_1756072/results/'
+Well1_PETH,Well2_PETH=plot_2wells_PETH_all_trials (result_folder)
+#%%
+PSTH_collection=Concat_PETH_pkl_files (result_folder, target_string='traces')
+fig, ax = plt.subplots(figsize=(6, 4))
+
+# filtered_columns = list(filter(lambda col: col.startswith('Day1') and col.endswith('_1'), PSTH_collection.columns))
+# Day_Well1_PETH = PSTH_collection[filtered_columns]
+# fp.Plot_mean_With_CI_PSTH(Day_Well1_PETH, before_window, after_window, animalID, meancolor='red', stdcolor='lightcoral', ax=ax)
+# filtered_columns = list(filter(lambda col: col.startswith('Day2') and col.endswith('_1'), PSTH_collection.columns))
+# Day_Well1_PETH = PSTH_collection[filtered_columns]
+# fp.Plot_mean_With_CI_PSTH(Day_Well1_PETH, before_window, after_window, animalID, meancolor='blue', stdcolor='lightblue', ax=ax)
+filtered_columns = list(filter(lambda col: col.startswith('Day3') and col.endswith('_1'), PSTH_collection.columns))
+Day_Well1_PETH = PSTH_collection[filtered_columns]
+fp.Plot_mean_With_CI_PSTH(Day_Well1_PETH, before_window, after_window, animalID, meancolor='green', stdcolor='lightgreen', ax=ax)
+filtered_columns = list(filter(lambda col: col.startswith('Day4') and col.endswith('_1'), PSTH_collection.columns))
+Day_Well1_PETH = PSTH_collection[filtered_columns]
+fp.Plot_mean_With_CI_PSTH(Day_Well1_PETH, before_window, after_window, animalID, meancolor='purple', stdcolor='pink', ax=ax)
+# filtered_columns = list(filter(lambda col: col.startswith('Day5') and col.endswith('_1'), PSTH_collection.columns))
+# Day_Well1_PETH = PSTH_collection[filtered_columns]
+# fp.Plot_mean_With_CI_PSTH(Day_Well1_PETH, before_window, after_window, animalID, meancolor='black', stdcolor='grey', ax=ax)
+>>>>>>> 4d7105db09b3d753863b1964bd17d7c43ab999c1

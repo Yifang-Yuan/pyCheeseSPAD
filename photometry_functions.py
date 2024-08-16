@@ -13,6 +13,7 @@ from scipy.sparse.linalg import spsolve
 from sklearn.linear_model import Lasso
 import pandas as pd
 import os
+from scipy import stats
 '''
 get_zdFF.py calculates standardized dF/F signal based on calcium-idependent 
 and calcium-dependent signals commonly recorded using fiber photometry calcium imaging
@@ -327,6 +328,33 @@ def PETH_plot_zscore_diff_window(ax, zscore_sync,centre_time, before_window,afte
     ax.plot(time_in_seconds,zscore_sync[start_idx:end_idx], label=Label, color=color,alpha=0.5)
     return ax
 
+def Plot_mean_With_CI_PSTH(event_window_traces, before_window, after_window, animalID, meancolor='blue', stdcolor='lightblue', ax=None):
+    event_window_traces = event_window_traces.dropna(axis=1, how='all')
+    mean_signal = event_window_traces.mean(axis=1)
+    sem = stats.sem(event_window_traces, axis=1, nan_policy='omit')
+    df = len(event_window_traces.columns) - 1
+    moe = stats.t.ppf(0.975, df) * sem  # 0.975 for 95% confidence level (two-tailed)
+    event_time = 0
+    num_samples = len(mean_signal)
+    time_in_seconds = np.linspace(-before_window, after_window, num_samples)
+
+    # If an 'ax' is provided, use it for plotting; otherwise, create a new figure and axis
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+    ax.plot(time_in_seconds, mean_signal, label='Mean Signal', color=meancolor,linewidth=1)
+    #ax.fill_between(time_in_seconds, mean_signal - moe, mean_signal + moe, color=stdcolor, alpha=0.5, label='95% CI')
+    print (mean_signal - moe)
+    ax.axvline(x=event_time, color='red', linestyle='--', label='Event Time')
+    ax.set_xlabel('Time (second)')
+    ax.set_ylabel('Value')
+    ax.set_title('Mean Signal with Standard Deviation ' + animalID)
+    #ax.legend()
+
+    # If 'ax' was provided, do not call plt.show() to allow the caller to display or save the figure as needed
+    if ax is None:
+        plt.show()
+    return ax
 
 def Plot_mean_With_Std_PSTH(event_window_traces, before_window, after_window, animalID, meancolor='blue', stdcolor='lightblue', ax=None):
     mean_signal = event_window_traces.mean(axis=1)
