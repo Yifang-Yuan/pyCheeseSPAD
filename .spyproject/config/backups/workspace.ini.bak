@@ -4,7 +4,7 @@ save_data_on_exit = True
 save_history = True
 save_non_project_files = False
 project_type = 'empty-project-type'
-recent_files = ['pyCheese_main.py', 'pyCheeseBatch.py', 'pyCheeseSession.py', 'photometry_functions.py', '..\\OptoEphysAnalysis\\SyncOECPySessionClass.py', '..\\OptoEphysAnalysis\\OpenEphysTools.py']
+recent_files = ['../../test.py', '../../My Code/MultipleRouteScore.py', 'pyCheese_main.py', 'pyCheeseSession.py', 'pyCheeseBatch.py', 'photometry_functions.py']
 
 [main]
 version = 0.2.0
