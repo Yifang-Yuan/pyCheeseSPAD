@@ -9,23 +9,27 @@ import pyCheeseSession
 import os
 import photometry_functions as fp
 import pandas as pd
-
+import Reward_Latency
+import re
+import MultipleRouteScore
 def Read_MultiDays_Save_CB_SB_results (total_days,parent_folder,save_folder,COLD_folder,animalID,before_window,after_window,SB=True):
     for day in range (1, total_days+1):
-        day_py_folder = f'{animalID}_day{day}/{animalID}CB/'
+        day_py_folder = f'Day{day}_photometry_CB/'
+        bonsai_folder = f'Day{day}_Bonsai/'
         if SB==True:
-            pySB_string=f'{animalID}_day{day}/{animalID}SB/'
+            pySB_string= f'Day{day}_photometry_SB/'
             pySBFolder = os.path.join(parent_folder, pySB_string)
         else:
             pySBFolder=None
-        COLD_filename=f'Training Data_Day{day}.xlsx'
+        COLD_filename=f'Training_Data_Day{day}.xlsx'
         SessionID=f'Day{day}'
         full_path_CB = os.path.join(parent_folder, day_py_folder)
-        current_session=pyCheeseSession.pyCheeseSession(full_path_CB,COLD_folder,
+        bonsai_folder = os.path.join(parent_folder, bonsai_folder)
+        current_session=pyCheeseSession.pyCheeseSession(full_path_CB,bonsai_folder,COLD_folder,
                                                  COLD_filename,save_folder,animalID=animalID,SessionID=SessionID,pySBFolder=pySBFolder)
         current_session.Plot_multiple_PETH_different_window(before_window,after_window)
         if SB:
-            current_session.find_peaks_in_SBtrials() 
+            current_session.find_peaks_in_SBtrials()
     return -1
 
 def Concat_PETH_pkl_files (parent_folder, target_string='traces.pkl'):
@@ -103,20 +107,41 @@ def plot_day_average_PETH_together(result_folder):
     return -1
 #%%
 'This is to call the above function to read all sessions in multiple days for an animal'
-total_days=5
-
-parent_folder='E:/CB_EC5aFibre/CB_EC5aFibre_1746062/'
-save_folder='E:/CB_EC5aFibre/CB_EC5aFibre_1746062/'
-COLD_folder='E:/CB_EC5aFibre/CB_EC5aFibre_1746062/workingfolder/'
-animalID='1746062'
-
+grandparent_folder = '/Volumes/YifangExp/Mingshuai/workingfolder/Group B1/'
+output_folder = grandparent_folder+'output/'
+parent_list = ['1769565','1804115']
 before_window=5
 after_window=5
-Read_MultiDays_Save_CB_SB_results (total_days,parent_folder,save_folder,COLD_folder,animalID,before_window,after_window,SB=False)
+PlotSB = True
+for i in range (len (parent_list)):
+    parent_folder = grandparent_folder+parent_list[i]+'/'
+    COLD_folder = parent_folder+'Cold_folder/'
+    save_folder = parent_folder
+    result_folder = parent_folder+'results/'
+    #Obtain total days
+    total_days = -1
+    for filename in os.listdir(COLD_folder):
+        if 'Day' in filename and filename.endswith('.xlsx'):
+            day_str = re.findall(r'\d+', filename.split('Day')[1])
+            day = day_str[0]
+            day = int(day)
+            if(day>total_days):
+                total_days = day
+    animalID = re.findall(r'\d+', parent_list[i])[-1]
+    SB = False
+    for dirpath, dirnames, filenames in os.walk(parent_folder):
+        if 'SB' in filenames or 'SB' in dirpath:
+            SB = True
+    if not SB:
+        PlotSB = False
+    Read_MultiDays_Save_CB_SB_results (total_days,parent_folder,save_folder,COLD_folder,animalID,before_window,after_window,SB=SB)
+    #%%
+    '''plot well1 and well2 average PETH for all sessions'''
+    ''' you need to put all the PETH files with the same half window in the same folder '''
+    Well1_PETH,Well2_PETH=plot_2wells_PETH_all_trials (result_folder)
+
 #%%
-'''plot well1 and well2 average PETH for all sessions'''
-''' you need to put all the PETH files with the same half window in the same folder '''
-result_folder='E:/CB_EC5aFibre/CB_EC5aFibre_1756072/results/'
-Well1_PETH,Well2_PETH=plot_2wells_PETH_all_trials (result_folder)
-#%%
-plot_day_average_PETH_together(result_folder)
+    plot_day_average_PETH_together(result_folder)
+    Reward_Latency.PlotRouteScoreGraph(COLD_folder,result_folder,output_folder)
+
+MultipleRouteScore.PlotRSForMultipleMouse(output_folder,output_folder,'route_score', 'z_dif',PlotSB = PlotSB)

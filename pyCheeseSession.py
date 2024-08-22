@@ -19,7 +19,7 @@ import scipy.signal as signal
 import pickle
 
 class pyCheeseSession:
-    def __init__(self, pyFolder,CheeseFolder,COLD_filename,save_folder,animalID='mice1',SessionID='Day1',pySBFolder=None):
+    def __init__(self, pyFolder, bonsai_folder,CheeseFolder,COLD_filename,save_folder,animalID='mice1',SessionID='Day1',pySBFolder=None):
         '''
         Parameters
         ----------
@@ -35,6 +35,7 @@ class pyCheeseSession:
         self.pyFs=130
         self.CamFs=24
         self.pyFolder=pyFolder
+        self.bonsai_folder = bonsai_folder
         self.CheeseFolder=CheeseFolder
         self.animalID=animalID
         self.SessionID=SessionID
@@ -91,6 +92,7 @@ class pyCheeseSession:
         sync_target_string='sync'
         
         files = os.listdir(self.pyFolder)
+        bonsai_files = os.listdir(self.bonsai_folder)
         filtered_files = [file for file in files if py_target_string in file]  
         cheeaseboard_session_data=fp.read_cheeseboard_from_COLD (self.CheeseFolder, self.COLD_resultfilename)
         photometry_df = pd.DataFrame([])
@@ -100,18 +102,16 @@ class pyCheeseSession:
             match = re.search(r'_(\d+)\.csv$', file)
             if match:
                 target_index= match.group(1)
-            print('Target_index: ',target_index)
             # Read the CSV file with photometry read
             raw_signal,raw_reference,Cam_Sync=fp.read_photometry_data (self.pyFolder, file, readCamSync=True,plot=False,sampling_rate=130)
             zdFF = fp.get_zdFF(raw_reference,raw_signal,smooth_win=10,remove=0,lambd=5e4,porder=1,itermax=50) 
-            filtered_files_sync = [file for file in files if sync_target_string in file]
+            filtered_files_sync = [file for file in bonsai_files if sync_target_string in file]
             for Sync_file in filtered_files_sync:
                 match_sync = re.search(r'sync_(\d+)\.csv$', Sync_file)
                 if match_sync:
                     sync_index= match_sync.group(1)
                 if sync_index == target_index:
-                    print(Sync_file)
-                    CamSync_LED=fp.read_Bonsai_Sync (self.pyFolder,Sync_file,plot=False)
+                    CamSync_LED=fp.read_Bonsai_Sync (self.bonsai_folder,Sync_file,plot=False)
                     zscore_sync,Sync_index_inCam,Sync_Start_time=fp.sync_photometry_Cam(zdFF,Cam_Sync,CamSync_LED,CamFs=self.CamFs)
                     zscore_series=pd.Series(zscore_sync)
                     zscore_series=zscore_series.reset_index(drop=True)
@@ -139,7 +139,7 @@ class pyCheeseSession:
     def Plot_multiple_PETH_different_window(self,before_window,after_window):
         event_window_traces = pd.DataFrame([])
         selected_columns = [col_name for col_name in self.photometry_df.columns if col_name.startswith('pyData') and col_name[6:].isdigit()]
-        print (selected_columns)
+        print ('selected_columns:',selected_columns)
         column_numbers = [int(col_name.replace('pyData', '')) for col_name in selected_columns]  
         event_time = 0 
         '''This is to make a figure and plot all PETH traces on the same figure'''
