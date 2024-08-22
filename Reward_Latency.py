@@ -317,7 +317,7 @@ def AddVerticalLines (ax, axvline):
         ax.axvline(x=axvline[i], color='r', linestyle='--', linewidth=2)
     return ax
 
-def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=5):
+def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.5):
     SB = False
     tot_trails = trails_tot()
     day_max = -1
@@ -570,10 +570,10 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=5)
         fig_SB_time.savefig(output_folder+'Total_with_time_Plot')
     
 #%%
-cold_folder = '/Users/zhumingshuai/Desktop/Programming/Photometry/input/1756072/1756072_cold/'
-pkl_folder = '/Users/zhumingshuai/Desktop/Programming/Photometry/input/1756072/1756072_pkl/'
-output_folder = '/Users/zhumingshuai/Desktop/Programming/Photometry/output/'
-PlotRouteScoreGraph(cold_folder, pkl_folder, output_folder,percentile=2.5)
+# cold_folder = '/Users/zhumingshuai/Desktop/Programming/Photometry/input/1756072/1756072_cold/'
+# pkl_folder = '/Users/zhumingshuai/Desktop/Programming/Photometry/input/1756072/1756072_pkl/'
+# output_folder = '/Users/zhumingshuai/Desktop/Programming/Photometry/output/'
+# PlotRouteScoreGraph(cold_folder, pkl_folder, output_folder,percentile=2.5)
 
 
 
