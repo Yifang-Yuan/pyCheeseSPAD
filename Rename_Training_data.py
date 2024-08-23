@@ -11,10 +11,10 @@ import openpyxl
 import re
 import os
 
-input_folder = 'D:/Mingshuai/output/1079&1081/'
+input_folder = '/Volumes/YifangExp/Mingshuai/Group B/results/1769565&1786534&1786535/'
 input_file = 'Training Data.xlsx'
 file_name_column = 'name'
-output_folder_prefix = 'D:/Mingshuai/output/1079&1081/'
+output_folder_prefix = '/Volumes/YifangExp/Mingshuai/Group B/results/1769565&1786534&1786535/'
 output_file_prefix = 'Training_Data_Day'
 
 def ReadTrainingData (input_folder,input_file,file_name_column):
@@ -33,16 +33,16 @@ class SingleTrail:
         self.content = content
         
 class Mouse:
-    multple_trails = []
     def __init__(self,ID,max_day):
         self.ID = ID
         self.max_day = max_day
+        self.multiple_trails = []
+
     def AddTrail(self,trail):
-        multiple_trails.append(trail)
+        self.multiple_trails.append(trail)
+
     def SortTrails(self):
-        multiple_trails.sort(key=lambda x:x.ID)
-    def ReturnTrails(self):
-        return(multiple_trails)
+        self.multiple_trails.sort(key=lambda x:x.ID)
         
 def ReadData (training_data, row_index):
     name = training_data.iloc[row_index,0]
@@ -81,6 +81,7 @@ def OutputTrainingData (multiple_trails,day,header,output_folder):
     output_workbook = openpyxl.Workbook()
     active_workbook = output_workbook.active
     active_workbook.append(header)
+    
     for i in range (len(multiple_trails)):
         if (multiple_trails[i].day == day):
             active_workbook.append(multiple_trails[i].content)
@@ -101,8 +102,6 @@ Main function
 """
 
 training_data = ReadTrainingData(input_folder, input_file, file_name_column)
-
-multiple_trails = []
 
 header = ObtainHeader(training_data)
 
@@ -125,5 +124,5 @@ for i in range(len(mouse_list)):
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
     for j in range (1,mouse_list[i].max_day+1):
-        OutputTrainingData(mouse_list[i].ReturnTrails(), j, header,output_folder)
-    OutputTrainingData(mouse_list[i].ReturnTrails(), -1, header,output_folder)
+        OutputTrainingData(mouse_list[i].multiple_trails, j, header,output_folder)
+    OutputTrainingData(mouse_list[i].multiple_trails, -1, header,output_folder)
