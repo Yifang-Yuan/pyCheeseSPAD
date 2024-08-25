@@ -310,7 +310,8 @@ def adjust_time_to_photometry(cheeaseboard_session_data,trial_index,Sync_Start_t
         well2time=float('nan')
         
     leftfirstwell_time=(leftfirstwell_time_COLD+startingtime_COLD)-Sync_Start_time
-    print ('leftfirstwell_time--',leftfirstwell_time )
+    #print ('leftfirstwell_time--',leftfirstwell_time)
+    print ('entertime--',entertime)
     return entertime, well1time, well2time,leftfirstwell_time
 
 def PETH_plot_zscore(ax, zscore_sync,centre_time, half_timewindow, fs,color,Label='zscore'):

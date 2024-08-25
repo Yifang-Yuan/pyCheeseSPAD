@@ -7,15 +7,15 @@ Created on Sun Aug  4 15:56:27 2024
 import pyCheeseSession
 import os
 #%%
-pyFolder='G:/Mingshuai/workingfolder/Group B1/1804115/Day3_photometry_CB/'
-pySBFolder='G:/Mingshuai/workingfolder/Group B1/1804115/Day3_photometry_SB/'
-COLD_folder='G:/Mingshuai/workingfolder/Group B1/1804115/Cold_folder/'
-bonsai_folder='G:/Mingshuai/workingfolder/Group B1/1804115/Day3_Bonsai/'
+pyFolder='F:/CB_EC5aFibre/CB_EC5aFibre_1756072/Day1_photometry_CB/'
+pySBFolder='F:/CB_EC5aFibre/CB_EC5aFibre_1756072/Day1_photometry_SB/'
+COLD_folder='F:/CB_EC5aFibre/CB_EC5aFibre_1756072/Cold_folder/'
+bonsai_folder='F:/CB_EC5aFibre/CB_EC5aFibre_1756072/Day1_Bonsai/'
 # Set your parameters
-COLD_filename='Training_Data_Day3.xlsx'
-save_folder='G:/Mingshuai/workingfolder/Group B1/1804115/'
-animalID='1804115'
-SessionID='Day3'
+COLD_filename='Training_Data_Day1.xlsx'
+save_folder='F:/CB_EC5aFibre/CB_EC5aFibre_1756072/'
+animalID='1756072'
+SessionID='Day1'
 session1=pyCheeseSession.pyCheeseSession(pyFolder,bonsai_folder,COLD_folder,COLD_filename,save_folder,animalID=animalID,SessionID=SessionID,pySBFolder=pySBFolder)
 #%%
 'This will plot the average of two collecting reward PETH with the preset half window'

@@ -223,10 +223,12 @@ class pyCheeseSession:
             column_photometry_data = self.photometry_df[column_name]
             
             column_entertime=self.cheese_df[f'entertime{col_num}'][0]
+            print ('column_entertime--',f'entertime{col_num}--',column_entertime)
             if not np.isnan(column_entertime).any():
                 start_idx=int(column_entertime*self.pyFs)
                 end_idx=int((column_entertime+window)*self.pyFs)
                 para_event_photometry_data=column_photometry_data[start_idx:end_idx].reset_index(drop=True)
+                #print ('para_ENTER_photometry_data',para_event_photometry_data)
                 event_time_photometry_trace[f'pyData{col_num}'+'_enter']=para_event_photometry_data
                 fp.PETH_plot_zscore_diff_window(ax1, self.photometry_df[f'pyData{col_num}'],centre_time=
                                   self.cheese_df[f'entertime{col_num}'][0], before_window=0,
