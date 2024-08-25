@@ -145,7 +145,7 @@ class pyCheeseSession:
         column_numbers = [int(col_name.replace('pyData', '')) for col_name in selected_columns]  
         event_time = 0 
         '''This is to make a figure and plot all PETH traces on the same figure'''
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(6, 10))
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
         for col_num in column_numbers:
             column_name = f'pyData{col_num}'
             column_photometry_data = self.photometry_df[column_name]
@@ -182,32 +182,28 @@ class pyCheeseSession:
         fig.suptitle('Single traces while reaching well1 (green) and well2 (red) '+self.animalID)
         plt.tight_layout()
         plt.show()
-        output_path = os.path.join(self.result_path, self.animalID+self.SessionID+str(before_window)+'sec_window_reward_single.png')
+        output_path = os.path.join(self.result_path, self.animalID+self.SessionID+'_'+str(before_window)+'sec_window_reward_single.png')
         fig.savefig(output_path, bbox_inches='tight', pad_inches=0, transparent=True)
-        #plt.legend()
-        # main_signal = reward_event_window_traces.mean(axis=1)
-        # std_deviation = reward_event_window_traces.std(axis=1)
-        # # Create the plot
-        # num_samples = len(main_signal)
-        # #time_in_seconds = np.arange(num_samples) / fs
-        # time_in_seconds = np.linspace(-before_window, after_window, num_samples)
-        # Set the x-axis tick positions and labels
+        
+        'separate well 1 and well 2 and plot average traces'
+        filtered_columns = [col for col in reward_event_window_traces.columns if col.endswith('_1')]
+        Well1_PETH = reward_event_window_traces[filtered_columns]
+        filtered_columns = [col for col in reward_event_window_traces.columns if col.endswith('_2')]
+        Well2_PETH = reward_event_window_traces[filtered_columns]
+        '''plot'''
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
+        fp.Plot_mean_With_CI_PSTH(Well1_PETH, before_window, after_window, self.animalID, meancolor='green', stdcolor='lightgreen', ax=ax1)
+        fp.Plot_mean_With_CI_PSTH(Well2_PETH, before_window, after_window, self.animalID, meancolor='red', stdcolor='lightcoral', ax=ax2)
+        output_path = os.path.join(self.result_path, self.animalID+self.SessionID+'_'+str(before_window)+'sec_window_reward_average.png')
+        fig.savefig(output_path, bbox_inches='tight', pad_inches=0, transparent=True)
+        'plot average trace for both rewards'
         fig = plt.figure(figsize=(10, 6))
         ax = fig.add_subplot(111)
         fp.Plot_mean_With_CI_PSTH(reward_event_window_traces, before_window, after_window, self.animalID, meancolor='blue', stdcolor='lightblue', ax=ax)
-        # ax.plot(time_in_seconds,main_signal, label='Mean Signal', color='blue')
-        # ax.fill_between(time_in_seconds, main_signal - std_deviation, main_signal + std_deviation, color='lightblue', alpha=0.5, label='Standard Deviation')
-        # ax.axvline(x=event_time, color='red', linestyle='--', label='Event Time')
-        # ax.set_xlabel('Time (second)')
-        # ax.set_ylabel('Value')
-        # ax.spines['right'].set_visible(False)
-        # ax.spines['top'].set_visible(False)
-        # plt.title('Mean Signal with Standard Deviation '+self.animalID)
         ax.legend()
         plt.show()
         output_path = os.path.join(self.result_path, self.animalID+'_'+self.SessionID+'_'+str(before_window)+'sec_window_reward_mean_std.png')
         fig.savefig(output_path, bbox_inches='tight', pad_inches=0, transparent=True)
-        
         '''save the pkl file for the PETH data with half window time specified'''
         filename=self.animalID+'_'+self.SessionID+'_'+str(before_window)+'sec_win_traces.pkl'
         self.reward_event_window_traces=reward_event_window_traces
@@ -278,14 +274,30 @@ class pyCheeseSession:
             else:
                 length=(window)*self.pyFs
                 event_time_photometry_trace[f'pyData{col_num}'+'_beforewell2']=pd.Series(np.nan, index=range(length))
-                
-
         plt.xlabel('Time (second)')
         plt.ylabel('Value')
         fig.suptitle('Event time traces '+self.animalID)
         plt.tight_layout()
         plt.show()
         output_path = os.path.join(self.result_path, self.animalID+self.SessionID+str(window)+'sec_window_event_traces.png')
+        fig.savefig(output_path, bbox_inches='tight', pad_inches=0, transparent=True)
+        
+        'filtered each event and plot average'
+        filtered_columns = [col for col in event_time_photometry_trace.columns if col.endswith('_enter')]
+        entertime_PETH = event_time_photometry_trace[filtered_columns]
+        filtered_columns = [col for col in event_time_photometry_trace.columns if col.endswith('_beforewell1')]
+        before_well1_PETH= event_time_photometry_trace[filtered_columns]
+        filtered_columns = [col for col in event_time_photometry_trace.columns if col.endswith('_leftwell1')]
+        left_well1_PETH= event_time_photometry_trace[filtered_columns]
+        filtered_columns = [col for col in event_time_photometry_trace.columns if col.endswith('_beforewell2')]
+        before_well2_PETH= event_time_photometry_trace[filtered_columns]
+                                                                        
+        fig, ((ax1, ax2), (ax3, ax4))  = plt.subplots(2, 2, figsize=(10, 10))
+        fp.Plot_mean_With_CI_PSTH(entertime_PETH, 0, window, self.animalID, meancolor='grey', stdcolor='lightgrey', ax=ax1)
+        fp.Plot_mean_With_CI_PSTH(before_well1_PETH, window, 0, self.animalID, meancolor='green', stdcolor='lightgreen', ax=ax2)
+        fp.Plot_mean_With_CI_PSTH(left_well1_PETH, 0, window, self.animalID, meancolor='green', stdcolor='lightgreen', ax=ax3)
+        fp.Plot_mean_With_CI_PSTH(before_well2_PETH, window, 0, self.animalID, meancolor='red', stdcolor='lightcoral', ax=ax4)
+        output_path = os.path.join(self.result_path, self.animalID+self.SessionID+'_'+str(window)+'sec_window_event_average.png')
         fig.savefig(output_path, bbox_inches='tight', pad_inches=0, transparent=True)
 
         '''save the pkl file for the PETH data with half window time specified'''
@@ -333,7 +345,7 @@ class pyCheeseSession:
             plt.show()
         return ax
 
-    def find_peaks_in_SBtrials (self):
+    def find_peaks_in_SBtrials (self,plot=False):
         py_target_string='py'
         files = os.listdir(self.pySBFolder)
         filtered_files = [file for file in files if py_target_string in file]  
@@ -370,14 +382,14 @@ class pyCheeseSession:
             
             with open(pkl_filepath, 'wb') as pkl_file:
                 pickle.dump(results_dict, pkl_file)
-                
-            plt.figure(figsize=(10, 3))
-            plt.plot(time, zdFF, label='Signal Trace')
-            plt.plot(time[peaks], zdFF[peaks], 'rx', label='Peaks')
-            plt.xlabel('Time')
-            plt.ylabel('Amplitude')
-            plt.title('Signal Trace with Peaks Labeled')
-            plt.legend()
-            plt.show()
+            if plot:    
+                plt.figure(figsize=(10, 3))
+                plt.plot(time, zdFF, label='Signal Trace')
+                plt.plot(time[peaks], zdFF[peaks], 'rx', label='Peaks')
+                plt.xlabel('Time')
+                plt.ylabel('Amplitude')
+                plt.title('Signal Trace with Peaks Labeled')
+                plt.legend()
+                plt.show()
         return -1
     
