@@ -297,6 +297,8 @@ def adjust_time_to_photometry(cheeaseboard_session_data,trial_index,Sync_Start_t
     startingtime_COLD=cheeaseboard_session_data['startingtime_s'][trial_index]
     well1time_COLD=cheeaseboard_session_data['well1time_s'][trial_index]
     well2time_COLD=cheeaseboard_session_data['well2time_s'][trial_index]
+    leftfirstwell_time_COLD=cheeaseboard_session_data['leftfirstwell_s'][trial_index]
+    
     entertime=startingtime_COLD-Sync_Start_time
     if not well1time_COLD==120:
         well1time=(well1time_COLD+startingtime_COLD)-Sync_Start_time
@@ -306,7 +308,10 @@ def adjust_time_to_photometry(cheeaseboard_session_data,trial_index,Sync_Start_t
         well2time=(well2time_COLD+startingtime_COLD)-Sync_Start_time
     else:
         well2time=float('nan')
-    return entertime, well1time, well2time
+        
+    leftfirstwell_time=(leftfirstwell_time_COLD+startingtime_COLD)-Sync_Start_time
+    print ('leftfirstwell_time--',leftfirstwell_time )
+    return entertime, well1time, well2time,leftfirstwell_time
 
 def PETH_plot_zscore(ax, zscore_sync,centre_time, half_timewindow, fs,color,Label='zscore'):
     start_idx=int((centre_time-half_timewindow)*fs)
@@ -344,7 +349,7 @@ def Plot_mean_With_CI_PSTH(event_window_traces, before_window, after_window, ani
 
     ax.plot(time_in_seconds, mean_signal, label='Mean Signal', color=meancolor,linewidth=1)
     ax.fill_between(time_in_seconds, mean_signal - moe, mean_signal + moe, color=stdcolor, alpha=0.5, label='95% CI')
-    print (mean_signal - moe)
+    #print (mean_signal - moe)
     ax.axvline(x=event_time, color='red', linestyle='--', label='Event Time')
     ax.set_xlabel('Time (second)')
     ax.set_ylabel('Value')

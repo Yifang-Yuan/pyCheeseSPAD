@@ -28,6 +28,7 @@ def Read_MultiDays_Save_CB_SB_results (total_days,parent_folder,save_folder,COLD
         current_session=pyCheeseSession.pyCheeseSession(full_path_CB,bonsai_folder,COLD_folder,
                                                  COLD_filename,save_folder,animalID=animalID,SessionID=SessionID,pySBFolder=pySBFolder)
         current_session.Plot_multiple_PETH_different_window(before_window,after_window)
+        current_session.Event_time_to_pickle(window=4)
         if SB:
             current_session.find_peaks_in_SBtrials()
     return -1
@@ -51,7 +52,7 @@ def Concat_PETH_pkl_files (parent_folder, target_string='traces.pkl'):
     return result_df
 
 def plot_2wells_PETH_all_trials (result_folder):
-    PSTH_collection=Concat_PETH_pkl_files (result_folder, target_string='traces')
+    PSTH_collection=Concat_PETH_pkl_files (result_folder, target_string='win_traces')
     filtered_columns = [col for col in PSTH_collection.columns if col.endswith('_1')]
     Well1_PETH = PSTH_collection[filtered_columns]
 
@@ -69,7 +70,7 @@ def plot_2wells_PETH_all_trials (result_folder):
     return Well1_PETH,Well2_PETH
 
 def plot_day_average_PETH_together(result_folder):
-    PSTH_collection=Concat_PETH_pkl_files (result_folder, target_string='traces')
+    PSTH_collection=Concat_PETH_pkl_files (result_folder, target_string='win_traces')
     fig, ax = plt.subplots(figsize=(6, 4))
     filtered_columns = list(filter(lambda col: col.startswith('Day1') and col.endswith('_1'), PSTH_collection.columns))
     Day_Well1_PETH = PSTH_collection[filtered_columns]
@@ -107,9 +108,9 @@ def plot_day_average_PETH_together(result_folder):
     return -1
 #%%
 'This is to call the above function to read all sessions in multiple days for an animal'
-grandparent_folder = '/Volumes/YifangExp/Mingshuai/workingfolder/Group B1/'
+grandparent_folder = 'F:/CB_EC5aFibre/'
 output_folder = grandparent_folder+'output/'
-parent_list = ['1769565','1804115']
+parent_list = ['CB_EC5aFibre_1756072']
 before_window=5
 after_window=5
 PlotSB = True
@@ -135,12 +136,12 @@ for i in range (len (parent_list)):
     if not SB:
         PlotSB = False
     Read_MultiDays_Save_CB_SB_results (total_days,parent_folder,save_folder,COLD_folder,animalID,before_window,after_window,SB=SB)
-    #%%
+
     '''plot well1 and well2 average PETH for all sessions'''
     ''' you need to put all the PETH files with the same half window in the same folder '''
     Well1_PETH,Well2_PETH=plot_2wells_PETH_all_trials (result_folder)
 
-#%%
+
     plot_day_average_PETH_together(result_folder)
     Reward_Latency.PlotRouteScoreGraph(COLD_folder,result_folder,output_folder)
 
