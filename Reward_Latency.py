@@ -150,7 +150,7 @@ def ReadRouteScore (cold_folder, cold_file,pickle_folder,pickle_file,day,pfw,per
     for i in range (route_score_input.shape[0]):
         SB_filename = 'Day'+str(day)+'_trial'+str(i)
         for filename in os.listdir(pickle_folder):
-            if (SB_filename in filename) and ('SB' in filename):
+            if (SB_filename in filename) and ('SB' in filename) and (filename.endswith('.pkl')):
                 SB = pd.read_pickle(pickle_folder+filename)
                 SB_avg_PV = SB['average_peak_value']
                 SB_NP = SB['peak_freq']

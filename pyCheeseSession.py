@@ -141,7 +141,7 @@ class pyCheeseSession:
     def Plot_multiple_PETH_different_window(self,before_window,after_window):
         reward_event_window_traces = pd.DataFrame([])
         selected_columns = [col_name for col_name in self.photometry_df.columns if col_name.startswith('pyData') and col_name[6:].isdigit()]
-        print ('selected_columns:',selected_columns)
+        #('selected_columns:',selected_columns)
         column_numbers = [int(col_name.replace('pyData', '')) for col_name in selected_columns]  
         event_time = 0 
         '''This is to make a figure and plot all PETH traces on the same figure'''
@@ -356,7 +356,7 @@ class pyCheeseSession:
             match = re.search(r'_(\d+)\.csv$', file)
             if match:
                 target_index= match.group(1)
-            print('Target_index: ',target_index)
+            # print('Target_index: ',target_index)
             # Read the CSV file with photometry read
             raw_signal,raw_reference=fp.read_photometry_data (self.pySBFolder, file, readCamSync=False,plot=False,sampling_rate=130)
             zdFF = fp.get_zdFF(raw_reference,raw_signal,smooth_win=10,remove=0,lambd=5e4,porder=1,itermax=50) 
@@ -369,7 +369,7 @@ class pyCheeseSession:
             num_peaks = len(peaks)
             peak_freq = num_peaks/(len(zdFF)/self.pyFs) #number of peak per seconds
             zdff_max = np.max(zdFF)
-            print("Average peak value:", average_peak_value)            
+            # print("Average peak value:", average_peak_value)            
             # Construct the dictionary
             results_dict = {
                 'zdff_peak_values': zdff_peak_values,
