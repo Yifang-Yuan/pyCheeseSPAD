@@ -108,9 +108,9 @@ def plot_day_average_PETH_together(result_folder):
     return -1
 #%%
 'This is to call the above function to read all sessions in multiple days for an animal'
-grandparent_folder = 'F:/CB_EC5aFibre/'
+grandparent_folder = 'E:/Mingshuai/workingfolder/Group B1/'
 output_folder = grandparent_folder+'output/'
-parent_list = ['CB_EC5aFibre_1756072']
+parent_list = ['1769565','1804115']
 before_window=5
 after_window=5
 PlotSB = True
@@ -135,14 +135,14 @@ for i in range (len (parent_list)):
             SB = True
     if not SB:
         PlotSB = False
-    Read_MultiDays_Save_CB_SB_results (total_days,parent_folder,save_folder,COLD_folder,animalID,before_window,after_window,SB=SB)
+    #Read_MultiDays_Save_CB_SB_results (total_days,parent_folder,save_folder,COLD_folder,animalID,before_window,after_window,SB=SB)
 
     '''plot well1 and well2 average PETH for all sessions'''
     ''' you need to put all the PETH files with the same half window in the same folder '''
-    Well1_PETH,Well2_PETH=plot_2wells_PETH_all_trials (result_folder)
+    #Well1_PETH,Well2_PETH=plot_2wells_PETH_all_trials (result_folder)
 
 
     plot_day_average_PETH_together(result_folder)
     Reward_Latency.PlotRouteScoreGraph(COLD_folder,result_folder,output_folder)
 
-MultipleRouteScore.PlotRSForMultipleMouse(output_folder,output_folder,'route_score', 'z_dif',PlotSB = PlotSB)
+MultipleRouteScore.PlotRSForMultipleMouse(output_folder,output_folder,'route_score', 'z_dif')

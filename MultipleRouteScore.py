@@ -146,7 +146,10 @@ def PlotRSForMultipleMouse(input_folder,output_folder,y1_column='route_score',y2
             fig = PlotDoubleY(csv_files[i].df,y1_column,y2_column)
             fig.savefig(op+'/Less_Preferred_Well_RS.png')
             
+
     csv_files_norm_pfw,csv_files_norm_lpfw,csv_files_day_avg = IntegrateData(csv_files)
+    csv_files_norm_pfw,csv_files_norm_lpfw,csv_files_avg,csv_files_day_avg = IntegrateData(csv_files)
+
     fig = PlotDoubleY(csv_files_norm_pfw, y1_column,y2_column)
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
@@ -157,6 +160,7 @@ def PlotRSForMultipleMouse(input_folder,output_folder,y1_column='route_score',y2
         os.makedirs(output_folder)
     fig.savefig(output_folder+'Less_Preferred_well_Tot.png')
     PlotTwoDif(csv_files_norm_pfw, csv_files_norm_lpfw, csv_files_day_avg,output_folder)
+
     return
                 
                 
