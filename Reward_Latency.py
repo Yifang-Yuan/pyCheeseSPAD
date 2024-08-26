@@ -636,7 +636,7 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.
     lag_df1 = lag_data[~np.isnan(lag_data['Lag_dif1'])]
     lag_df2 = lag_data[~np.isnan(lag_data['Lag_dif2'])]
     fig_lag_dif1,lag_ax1 = plt.subplots(figsize=(7, 5))
-    PlotLagDif(lag_df1,'day','Lag_dif1',lag_ax1,color='black', label = 'after collecting npreferred well', xlab = 'Day',ylab = 'Lag Difference')
+    PlotLagDif(lag_df1,'day','Lag_dif1',lag_ax1,color='black', label = 'after collecting preferred well', xlab = 'Day',ylab = 'Lag Difference')
     PlotLagDif(lag_df2,'day','Lag_dif2',lag_ax1,color='green', label = 'after collecting less preferred well',xlab = 'Day',ylab = 'Lag Difference', title='z-score difference after collecting a reward')
     fig_lag_dif1.savefig(imp_folder+'lag_dif')
     

@@ -18,7 +18,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as stats
-import Reward_Latency_replica as RL
+import Reward_Latency as RL
 
 class input_file:
     def __init__ (self,folder,filename):
@@ -29,6 +29,7 @@ class input_file:
         self.df = pd.read_csv(self.path)
         self.day_avg = GetDayAvg(self.df)
         self.ContainSB = False
+        self.lag = False
         if 'Average' in self.filename:
             self.avg = True
             for i in range (len(self.df.columns.tolist())):
@@ -40,6 +41,9 @@ class input_file:
                 self.pfw = False
             else:
                 self.pfw = True
+        elif 'Lag' in self.filename:
+            self.lag = True
+            self.avg = False
         else:
             print('ERROR! Please remove irrelevent csv files in '+folder)
         
@@ -62,7 +66,7 @@ def IntegrateData (csv_files):
         file = csv_files[i]
         if (file.avg and file.ContainSB):
             csv_files_day_avg = pd.concat([csv_files_day_avg,file.day_avg], ignore_index=True)
-        elif not file.avg:
+        elif (not file.avg) and (not file.lag):
             if(file.pfw):
                 csv_files_norm_pfw = pd.concat([csv_files_norm_pfw,GetDayAvg(file.df)], ignore_index=True)
             else:
@@ -133,6 +137,8 @@ def PlotTwoDif (data_frame_pfw, data_frame_lpfw, data_frame_SB,output_folder):
 def PlotRSForMultipleMouse(input_folder,output_folder,y1_column='route_score',y2_column='z_dif'):
     csv_files = ReadFiles(input_folder)
     for i in range (len(csv_files)):
+        if (csv_files[i].lag):
+            continue
         if (not csv_files[i].avg) and csv_files[i].pfw:
             op = output_folder+csv_files[i].ID
             if not os.path.exists(op):
@@ -148,7 +154,6 @@ def PlotRSForMultipleMouse(input_folder,output_folder,y1_column='route_score',y2
             
 
     csv_files_norm_pfw,csv_files_norm_lpfw,csv_files_day_avg = IntegrateData(csv_files)
-    csv_files_norm_pfw,csv_files_norm_lpfw,csv_files_avg,csv_files_day_avg = IntegrateData(csv_files)
 
     fig = PlotDoubleY(csv_files_norm_pfw, y1_column,y2_column)
     if not os.path.exists(output_folder):
