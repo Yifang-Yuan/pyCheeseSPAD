@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Created on Thu Aug 22 12:08:15 2024
+
+@author: zhumingshuai
+"""
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
 Created on Wed Aug 14 18:03:57 2024
 
 @author: zhumingshuai
@@ -120,8 +128,8 @@ def PlotRSForMultipleMouse(input_folder,output_folder,y1_column,y2_column,PlotSB
                 
                 
 #%%
-input_folder = '/Users/zhumingshuai/Desktop/Programming/Photometry/output/'
-output_folder = '/Users/zhumingshuai/Desktop/Programming/Photometry/output/'
-PlotRSForMultipleMouse(input_folder,output_folder,'route_score', 'z_dif',PlotSB=False)
+# input_folder = '/Users/zhumingshuai/Desktop/Programming/Photometry/output/'
+# output_folder = '/Users/zhumingshuai/Desktop/Programming/Photometry/output/'
+# PlotRSForMultipleMouse(input_folder,output_folder,'route_score', 'z_dif',PlotSB=False)
 
 

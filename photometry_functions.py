@@ -225,6 +225,7 @@ def photometry_smooth_plot (raw_reference,raw_signal,sampling_rate=500, smooth_w
     return smooth_reference,smooth_Signal,r_base,s_base
 
 def read_photometry_data (folder, file_name, readCamSync=True,plot=False,sampling_rate=130):
+    print(folder+file_name)
     PhotometryData = pd.read_csv(folder+file_name,index_col=False) # Adjust this line depending on your data file
     raw_reference = PhotometryData[' Analog2'][1:]
     raw_signal = PhotometryData['Analog1'][1:]

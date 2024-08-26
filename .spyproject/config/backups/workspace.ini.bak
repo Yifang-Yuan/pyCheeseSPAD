@@ -4,7 +4,7 @@ save_data_on_exit = True
 save_history = True
 save_non_project_files = False
 project_type = 'empty-project-type'
-recent_files = ['../../test.py', '../../My Code/MultipleRouteScore.py', 'pyCheese_main.py', 'pyCheeseSession.py', 'pyCheeseBatch.py', 'photometry_functions.py']
+recent_files = ['../../test.py', 'Reward_Latency.py', 'Rename_Training_data.py', '../../My Code/Reward_Latency_replica.py', '../../My Code/MultipleRouteScore_replica.py', 'MultipleRouteScore.py']
 
 [main]
 version = 0.2.0
