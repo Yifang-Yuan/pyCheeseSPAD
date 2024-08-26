@@ -21,9 +21,11 @@ from scipy.stats import linregress
 import numpy as np
 import os
 import re
+from scipy import stats
 
 #If the well latency is greater than the critical_ignore_time. It will be mark as not found
 critical_ignore_time = 120
+CI = 0.95
 
 class trail_route_score:
     z_min_avg = None
@@ -40,7 +42,7 @@ class trail_route_score:
     z_dif_1 = None
     z_dif_2 = None
     
-    def __init__ (self,well1_route_score,well2_route_score,well1_latency,well2_latency,z1,z2,day,SB_avg_PV,SB_NP,SB_zdff_max):
+    def __init__ (self,well1_route_score,well2_route_score,well1_latency,well2_latency,z1,z2,day,SB_avg_PV,SB_NP,SB_zdff_max,l1,l2):
         self.well1_route_score = well1_route_score
         self.well2_route_score = well2_route_score
         self.well1_latency = well1_latency
@@ -51,6 +53,8 @@ class trail_route_score:
         self.SB_NP = SB_NP
         self.SB_avg_PV = SB_avg_PV
         self.SB_zdff_max = SB_zdff_max
+        self.l1 = l1
+        self.l2 = l2
         
     def Calculate(self,pct):
         self.z_min_1 = 999999
@@ -139,15 +143,17 @@ class truncated_data:
         self.latency = latency
         self.is_preferred_well = is_preferred_well
     
-def ReadRouteScore (cold_folder, cold_file,pickle_folder,pickle_file,day,pfw,percentile):
+def ReadRouteScore (cold_folder, cold_file,pickle_folder,pickle_file,lag_file,day,pfw,percentile):
     route_score_array = []
     route_score_input = fp.read_cheeseboard_from_COLD(cold_folder, cold_file)
     input_z_score = pd.read_pickle(pickle_folder+pickle_file)
+    input_lag_dif = pd.read_pickle(pickle_folder+lag_file)
     SB_avg_PV = None
     SB_NP = None
     SB_zdff_max = None
 
     for i in range (route_score_input.shape[0]):
+        
         SB_filename = 'Day'+str(day)+'_trial'+str(i)
         for filename in os.listdir(pickle_folder):
             if (SB_filename in filename) and ('SB' in filename) and (filename.endswith('.pkl')):
@@ -158,15 +164,30 @@ def ReadRouteScore (cold_folder, cold_file,pickle_folder,pickle_file,day,pfw,per
         well1_route_score = route_score_input['well1routescore'][i]
         well2_route_score = route_score_input['well2routescore'][i]
         filtered_z = input_z_score.filter(like='pyData'+str(i))
+        filtered_l = input_lag_dif.filter(like='pyData'+str(i))
         for j in range (filtered_z.shape[1]):
             if (filtered_z.columns[j][-1]=='1'):
                 z1 = filtered_z.iloc[:,j]
             if (filtered_z.columns[j][-1]=='2'):
                 z2 = filtered_z.iloc[:,j]
+        for j in range (filtered_l.shape[1]):
+            header = filtered_l.columns[j]
+            if ('enter' in header):
+                l1 = filtered_l.iloc[:,j]
+            if ('beforewell1' in header):
+                l2 = filtered_l.iloc[:,j]
+            if ('leftwell1' in header):
+                l3 = filtered_l.iloc[:,j]
+            if ('beforewell2' in header):
+                l4 = filtered_l.iloc[:,j] 
+        lag_dif1 = l2.mean()-l1.mean()
+        lag_dif2 = l4.mean()-l3.mean()
+        
         well1_latency = np.nan
         well2_latency = np.nan
         if (route_score_input['firstwellreached'][i]==2):
             z1,z2 = z2,z1
+            lag_dif1,lag_dif2 = lag_dif2,lag_dif1
             well2_latency = route_score_input['well2time_s'][i]
             well1_latency = route_score_input['latencybetweenwells_s'][i]
         elif (route_score_input['firstwellreached'][i]==1):
@@ -180,9 +201,11 @@ def ReadRouteScore (cold_folder, cold_file,pickle_folder,pickle_file,day,pfw,per
         
         if pfw == 2:
             z1,z2 = z2,z1
+            lag_dif1,lag_dif2 = lag_dif2,lag_dif1
             well1_latency,well2_latency = well2_latency,well1_latency
             well1_route_score,well2_route_score = well2_route_score,well1_route_score
-        single_trail_score = trail_route_score(well1_route_score,well2_route_score,well1_latency,well2_latency,z1,z2,day,SB_avg_PV,SB_NP,SB_zdff_max)
+
+        single_trail_score = trail_route_score(well1_route_score,well2_route_score,well1_latency,well2_latency,z1,z2,day,SB_avg_PV,SB_NP,SB_zdff_max,lag_dif1,lag_dif2)
         single_trail_score.Calculate(percentile)
         route_score_array.append(single_trail_score)    
     
@@ -303,6 +326,25 @@ def Plot_Single_RS (route_score_array,day,output_folder,SB=True):
     fig.savefig(output_folder+'CB_'+filename_prefix+str(day))
     return truncated_data(z_min, z_max, route_score, z_min_avg, z_max_avg, route_score_avg,pct_high,pct_low,z_dif,SB_avg_PV,SB_NP,SB_zdff_max,SB_avg_PV_U,SB_NP_U,SB_zdff_max_U,trail_ID,trail_ID_avg,z_dif_avg,day_ID,day_ID_avg,latency,is_preferred_well)
 
+def AppendLag (route_score_array,day):
+    trail_ID = []
+    day_ID = []
+    l1 = []
+    l2 = []
+    for i in range (len(route_score_array)):
+        if not np.isnan(route_score_array[i].l1) or not np.isnan(route_score_array[i].l2):
+            trail_ID.append(int(i))
+            day_ID.append(int(day))
+            l1.append(route_score_array[i].l1)
+            l2.append(route_score_array[i].l2)
+    data = pd.DataFrame({
+        'Lag_dif1': l1,
+        'Lag_dif2': l2,
+        'trail_ID': trail_ID,
+        'day': day_ID
+        })
+    return data
+
 def PlotLinearRegression (ax , x, y, x_label = 'route score',y_label = 'y',name = 'Linear regression for route score'):
     ax.scatter(x,y)
     slope, intercept, r_value, p_value, std_err = linregress(x, y)
@@ -317,7 +359,65 @@ def AddVerticalLines (ax, axvline):
         ax.axvline(x=axvline[i], color='r', linestyle='--', linewidth=2)
     return ax
 
+def CalculateDifErrorBar (array1,array2):
+    std1 = np.std(array1, ddof=1)
+    std2 = np.std(array2, ddof=1)
+    std_tot = np.sqrt((std1**2)/len(array1)+(std2**2)/len(array2))
+    df = len(array1) + len(array2) - 2
+    t_value = stats.t.ppf((1 + CI)/2., df)
+    confident_interval = std_tot*t_value
+    return std_tot
+
+def PlotRSDif (csv_file,day_column,column_name,ax,color='black',label = None,xlab = 'x', ylab = 'y',title = ''):
+    day_max = csv_file[day_column].max()
+    x = []
+    y = []
+    eb = []
+    for i in range (1, day_max):
+        array1 = csv_file[csv_file[day_column]==i][column_name]
+        array2 = csv_file[csv_file[day_column]==i+1][column_name]
+        array1 = np.array(array1)
+        array2 = np.array(array2)
+        error_bar = CalculateDifErrorBar(array1, array2)
+        dif = array2.mean()-array1.mean()
+        x.append(i)
+        y.append(dif)
+        eb.append(error_bar)
+    ax.errorbar(x, y, yerr=eb, fmt='-o', ecolor=color , color =color ,capsize=5, label=label)
+    ax.set_xlabel(xlab)
+    ax.set_ylabel(ylab)
+    ax.axhline(y=0, color='gray', linestyle='--', linewidth=1)
+    ax.set_xticks(x)
+    ax.set_title(title)
+    if label:
+        ax.legend()
+    return ax
+
+def PlotLagDif (df,day_column,column_name,ax,color='black',label = None,xlab = 'x', ylab = 'y',title = ''):
+    day_max = int(df[day_column].max())
+    x = []
+    y = []
+    eb = []
+    for i in range (1, day_max+1):
+        array1 = df[df[day_column]==i][column_name]
+        array1 = np.array(array1)
+        error_bar = std1 = np.std(array1, ddof=1)
+        x.append(i)
+        y.append(array1.mean())
+        eb.append(error_bar)
+    ax.errorbar(x, y, yerr=eb, fmt='-o', ecolor=color , color =color ,capsize=5, label=label)
+    ax.set_xlabel(xlab)
+    ax.set_ylabel(ylab)
+    ax.axhline(y=0, color='gray', linestyle='--', linewidth=1)
+    ax.set_xticks(x)
+    ax.set_title(title)
+    if label:
+        ax.legend()
+        
+
 def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.5):
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
     SB = False
     tot_trails = trails_tot()
     day_max = -1
@@ -329,16 +429,18 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.
             day = int(day)
             if(day>day_max):
                 day_max = day
-    files = [[None for _ in range(2)] for _ in range(day_max)]
+    files = [[None for _ in range(3)] for _ in range(day_max)]
     
     for filename in os.listdir(pickle_folder):
         if filename.endswith('.pkl'):
             day = re.findall(r'\d+', filename.split('Day')[1])
             day = day[0]
             day = int(day)
-            if 'win' in filename:
+            if 'half' in filename:
+                files[day-1][2] = filename
+            elif 'win' in filename:
                 files[day-1][1] = filename
-            if ('SB' in filename):
+            if 'SB' in filename:
                 SB = True
                 
     for filename in os.listdir(cold_folder):
@@ -374,7 +476,7 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.
         
     
     for i in range (len(files)):
-        route_score_array = ReadRouteScore(cold_folder, files[i][0],pickle_folder,files[i][1],i+1,pfw,percentile=percentile)
+        route_score_array = ReadRouteScore(cold_folder, files[i][0],pickle_folder,files[i][1],files[i][2],i+1,pfw,percentile=percentile)
         total_route_score_array.append(route_score_array)
     
     mouse_ID = files[0][1].split('_')[0]
@@ -386,7 +488,14 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.
  #integrate data
     axvline = []
     neo_day = 0
+    lag_data = pd.DataFrame({
+        'Lag_dif1': [],
+        'Lag_dif2': [],
+        'trail_ID': [],
+        'day': []
+        })
     for i in range (len(total_route_score_array)):
+        lag_data = pd.concat([lag_data, AppendLag(total_route_score_array[i], i+1)], ignore_index=True)
         td = Plot_Single_RS(total_route_score_array[i], i+1 , single_plot_output,SB=SB)
         tot_trails.z_min.extend(td.z_min)
         tot_trails.z_max.extend(td.z_max)
@@ -416,7 +525,10 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.
         tot_trails.trail_ID.extend(neo_ID)
         tot_trails.trail_ID_avg.extend(neo_ID_avg)
         neo_day += len(total_route_score_array[i])
-        
+    
+    lag_data.to_csv(output_folder+mouse_ID+'_Lag_dif.csv',index=False)
+    
+    
     if (SB):
         data1 = {
             'trail_ID':tot_trails.trail_ID,
@@ -517,6 +629,28 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.
     
     fig.savefig(output_folder+'Total_CB_Plot')
     
+    imp_folder = output_folder+'learning_curve/'
+    if not os.path.exists(imp_folder):
+        os.makedirs(imp_folder)
+    
+    lag_df1 = lag_data[~np.isnan(lag_data['Lag_dif1'])]
+    lag_df2 = lag_data[~np.isnan(lag_data['Lag_dif2'])]
+    fig_lag_dif1,lag_ax1 = plt.subplots(figsize=(7, 5))
+    PlotLagDif(lag_df1,'day','Lag_dif1',lag_ax1,color='black', label = 'after collecting npreferred well', xlab = 'Day',ylab = 'Lag Difference')
+    PlotLagDif(lag_df2,'day','Lag_dif2',lag_ax1,color='green', label = 'after collecting less preferred well',xlab = 'Day',ylab = 'Lag Difference', title='z-score difference after collecting a reward')
+    fig_lag_dif1.savefig(imp_folder+'lag_dif')
+    
+    fig_dif1,imp_ax1 = plt.subplots(figsize=(7, 5))
+    PlotRSDif(filtered_df1,'day','route_score',imp_ax1,color='black', label = 'preferred well', xlab = 'Day',ylab = 'Route Score')
+    PlotRSDif(filtered_df2,'day','route_score',imp_ax1,color='green', label = 'less preferred well',xlab = 'Day',ylab = 'Route Score')
+    fig_dif1.savefig(imp_folder+'RouteScore')
+    
+    fig_dif5,imp_ax5 = plt.subplots(figsize=(7, 5))
+    PlotRSDif(filtered_df1,'day','z_dif',imp_ax5,color='black', label = 'preferred well', xlab = 'Day',ylab = 'z_dif')
+    PlotRSDif(filtered_df2,'day','z_dif',imp_ax5,color='green', label = 'less preferred well',xlab = 'Day',ylab = 'z_dif')
+    fig_dif5.savefig(imp_folder+'z_dif')
+    
+    
     if (SB):
         fig_SB = plt.figure(figsize=(10, 30))
         SB_ax1 = fig_SB.add_subplot(311)
@@ -568,10 +702,25 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.
         SB_bx2.set_ylabel('average_peak_value_in_SB')
         SB_bx3.set_ylabel('zdff_max')
         fig_SB_time.savefig(output_folder+'Total_with_time_Plot')
-    
+        
+
+        fig_dif2,imp_ax2 = plt.subplots(figsize=(7, 5))
+        PlotRSDif(RSA,'day','SB_peak_frequency',imp_ax2,color='black', xlab = 'Day',ylab = 'SB_peak_frequency')
+        fig_dif2.savefig(imp_folder+'SB_peak_frequency')
+        
+        fig_dif3,imp_ax3 = plt.subplots(figsize=(7, 5))
+        PlotRSDif(RSA,'day','SB_zdff_max',imp_ax3,color='black', xlab = 'Day',ylab = 'SB_zdff_max')
+        fig_dif3.savefig(imp_folder+'SB_zdff_max')
+        
+        fig_dif4,imp_ax4 = plt.subplots(figsize=(7, 5))
+        PlotRSDif(RSA,'day','SB_average_peak_value',imp_ax4,color='black', xlab = 'Day',ylab = 'SB_average_peak_value')
+        fig_dif4.savefig(imp_folder+'SB_zdff_maxSB_average_peak_value')
+        
+        
 #%%
 # cold_folder = '/Users/zhumingshuai/Desktop/Programming/Photometry/input/1756072/1756072_cold/'
 # pkl_folder = '/Users/zhumingshuai/Desktop/Programming/Photometry/input/1756072/1756072_pkl/'
+# lag_folder = '/Users/zhumingshuai/Desktop/Programming/Photometry/WoW/'
 # output_folder = '/Users/zhumingshuai/Desktop/Programming/Photometry/output/'
 # PlotRouteScoreGraph(cold_folder, pkl_folder, output_folder,percentile=2.5)
 
