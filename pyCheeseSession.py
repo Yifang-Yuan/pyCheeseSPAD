@@ -116,7 +116,8 @@ class pyCheeseSession:
                     zscore_series=pd.Series(zscore_sync)
                     zscore_series=zscore_series.reset_index(drop=True)
                     Sync_Start_time_series=pd.Series(Sync_Start_time)
-                    entertime, well1time,well2time=fp.adjust_time_to_photometry(cheeaseboard_session_data,int(target_index),Sync_Start_time)
+                    entertime, well1time,well2time,leftfirstwell_time=fp.adjust_time_to_photometry(cheeaseboard_session_data,
+                                                                                                   int(target_index),Sync_Start_time)
                     if np.isnan(well1time):
                         real_well1time = well2time
                         real_well2time =well1time
@@ -132,19 +133,19 @@ class pyCheeseSession:
                     cheese_df['entertime'+target_index]=pd.Series(entertime)
                     cheese_df['well1time'+target_index]=pd.Series(real_well1time)
                     cheese_df['well2time'+target_index]=pd.Series(real_well2time)
+                    cheese_df['leftwell1time'+target_index]=pd.Series(leftfirstwell_time)
             self.photometry_df=photometry_df
             self.cheese_df=cheese_df
         return self.photometry_df,self.cheese_df
         
     def Plot_multiple_PETH_different_window(self,before_window,after_window):
-        event_window_traces = pd.DataFrame([])
+        reward_event_window_traces = pd.DataFrame([])
         selected_columns = [col_name for col_name in self.photometry_df.columns if col_name.startswith('pyData') and col_name[6:].isdigit()]
         #('selected_columns:',selected_columns)
         column_numbers = [int(col_name.replace('pyData', '')) for col_name in selected_columns]  
         event_time = 0 
         '''This is to make a figure and plot all PETH traces on the same figure'''
-        fig = plt.figure(figsize=(10, 6))
-        ax = fig.add_subplot(111)
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
         for col_num in column_numbers:
             column_name = f'pyData{col_num}'
             column_photometry_data = self.photometry_df[column_name]
@@ -153,60 +154,159 @@ class pyCheeseSession:
                 start_idx=int((column_well1time-before_window)*self.pyFs)
                 end_idx=int((column_well1time+after_window)*self.pyFs)
                 para_event_photometry_data=column_photometry_data[start_idx:end_idx].reset_index(drop=True)
-                event_window_traces[f'pyData{col_num}'+'_1']=para_event_photometry_data
-                fp.PETH_plot_zscore_diff_window(ax, self.photometry_df[f'pyData{col_num}'],centre_time=
+                reward_event_window_traces[f'pyData{col_num}'+'_1']=para_event_photometry_data
+                fp.PETH_plot_zscore_diff_window(ax1, self.photometry_df[f'pyData{col_num}'],centre_time=
                                  self.cheese_df[f'well1time{col_num}'][0], before_window=before_window,
                                  after_window=after_window, fs=self.pyFs,color='green',Label=f'Trace{col_num+1} Well1time')
             else:
                 length=(before_window+after_window)*self.pyFs
-                event_window_traces[f'pyData{col_num}'+'_1']=pd.Series(np.nan, index=range(length))
+                reward_event_window_traces[f'pyData{col_num}'+'_1']=pd.Series(np.nan, index=range(length))
             column_well2time=self.cheese_df[f'well2time{col_num}'][0]
             if not np.isnan(column_well2time).any():
                 start_idx=int((column_well2time-before_window)*self.pyFs)
                 end_idx=int((column_well2time+after_window)*self.pyFs)
                 para_event_photometry_data=column_photometry_data[start_idx:end_idx].reset_index(drop=True)
-                event_window_traces[f'pyData{col_num}'+'_2']=para_event_photometry_data
-                fp.PETH_plot_zscore_diff_window(ax, self.photometry_df[f'pyData{col_num}'],centre_time=
+                reward_event_window_traces[f'pyData{col_num}'+'_2']=para_event_photometry_data
+                fp.PETH_plot_zscore_diff_window(ax2, self.photometry_df[f'pyData{col_num}'],centre_time=
                                  self.cheese_df[f'well2time{col_num}'][0], before_window=before_window,
                                  after_window=after_window, fs=self.pyFs,color='red',Label=f'Trace{col_num+1} Well2time')
             else:
                 length=(before_window+after_window)*self.pyFs
-                event_window_traces[f'pyData{col_num}'+'_2']=pd.Series(np.nan, index=range(length))
-        ax.axvline(x=0, color='red', linestyle='--', label='Event Time') 
+                reward_event_window_traces[f'pyData{col_num}'+'_2']=pd.Series(np.nan, index=range(length))
+        ax1.axvline(x=event_time, color='red', linestyle='--', label='Event Time') 
+        ax2.axvline(x=event_time, color='red', linestyle='--', label='Event Time') 
+        ax1.set_title("1st reached reward")
+        ax2.set_title("2nd reached reward")
         plt.xlabel('Time (second)')
         plt.ylabel('Value')
-        plt.title('Single Calcium traces while reaching well1 (green) and well2 (red) '+self.animalID)
-        output_path = os.path.join(self.result_path, self.animalID+self.SessionID+str(before_window)+'sec_window_reward_single.png')
+        fig.suptitle('Single traces while reaching well1 (green) and well2 (red) '+self.animalID)
+        plt.tight_layout()
+        plt.show()
+        output_path = os.path.join(self.result_path, self.animalID+self.SessionID+'_'+str(before_window)+'sec_window_reward_single.png')
         fig.savefig(output_path, bbox_inches='tight', pad_inches=0, transparent=True)
-        #plt.legend()
-        # main_signal = event_window_traces.mean(axis=1)
-        # std_deviation = event_window_traces.std(axis=1)
-        # # Create the plot
-        # num_samples = len(main_signal)
-        # #time_in_seconds = np.arange(num_samples) / fs
-        # time_in_seconds = np.linspace(-before_window, after_window, num_samples)
-        # Set the x-axis tick positions and labels
+        
+        'separate well 1 and well 2 and plot average traces'
+        filtered_columns = [col for col in reward_event_window_traces.columns if col.endswith('_1')]
+        Well1_PETH = reward_event_window_traces[filtered_columns]
+        filtered_columns = [col for col in reward_event_window_traces.columns if col.endswith('_2')]
+        Well2_PETH = reward_event_window_traces[filtered_columns]
+        '''plot'''
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
+        fp.Plot_mean_With_CI_PSTH(Well1_PETH, before_window, after_window, self.animalID, meancolor='green', stdcolor='lightgreen', ax=ax1)
+        fp.Plot_mean_With_CI_PSTH(Well2_PETH, before_window, after_window, self.animalID, meancolor='red', stdcolor='lightcoral', ax=ax2)
+        output_path = os.path.join(self.result_path, self.animalID+self.SessionID+'_'+str(before_window)+'sec_window_reward_average.png')
+        fig.savefig(output_path, bbox_inches='tight', pad_inches=0, transparent=True)
+        'plot average trace for both rewards'
         fig = plt.figure(figsize=(10, 6))
         ax = fig.add_subplot(111)
-        fp.Plot_mean_With_CI_PSTH(event_window_traces, before_window, after_window, self.animalID, meancolor='blue', stdcolor='lightblue', ax=ax)
-        # ax.plot(time_in_seconds,main_signal, label='Mean Signal', color='blue')
-        # ax.fill_between(time_in_seconds, main_signal - std_deviation, main_signal + std_deviation, color='lightblue', alpha=0.5, label='Standard Deviation')
-        # ax.axvline(x=event_time, color='red', linestyle='--', label='Event Time')
-        # ax.set_xlabel('Time (second)')
-        # ax.set_ylabel('Value')
-        # ax.spines['right'].set_visible(False)
-        # ax.spines['top'].set_visible(False)
-        # plt.title('Mean Signal with Standard Deviation '+self.animalID)
+        fp.Plot_mean_With_CI_PSTH(reward_event_window_traces, before_window, after_window, self.animalID, meancolor='blue', stdcolor='lightblue', ax=ax)
         ax.legend()
         plt.show()
         output_path = os.path.join(self.result_path, self.animalID+'_'+self.SessionID+'_'+str(before_window)+'sec_window_reward_mean_std.png')
         fig.savefig(output_path, bbox_inches='tight', pad_inches=0, transparent=True)
-        
         '''save the pkl file for the PETH data with half window time specified'''
         filename=self.animalID+'_'+self.SessionID+'_'+str(before_window)+'sec_win_traces.pkl'
-        self.event_window_traces=event_window_traces
-        self.event_window_traces.to_pickle(os.path.join(self.result_path, filename))
-        return self.event_window_traces
+        self.reward_event_window_traces=reward_event_window_traces
+        self.reward_event_window_traces.to_pickle(os.path.join(self.result_path, filename))
+        return self.reward_event_window_traces
+    
+    def Event_time_to_pickle(self,window):
+        event_time_photometry_trace = pd.DataFrame([])
+        selected_columns = [col_name for col_name in self.photometry_df.columns if col_name.startswith('pyData') and col_name[6:].isdigit()]
+        print ('selected_columns:',selected_columns)
+        column_numbers = [int(col_name.replace('pyData', '')) for col_name in selected_columns]  
+        '''This is to make a figure and plot all PETH traces on the same figure'''
+
+        fig, ((ax1, ax2), (ax3, ax4))  = plt.subplots(2, 2, figsize=(10, 10))
+        for col_num in column_numbers:
+            column_name = f'pyData{col_num}'
+            column_photometry_data = self.photometry_df[column_name]
+            
+            column_entertime=self.cheese_df[f'entertime{col_num}'][0]
+            print ('column_entertime--',f'entertime{col_num}--',column_entertime)
+            if not np.isnan(column_entertime).any():
+                start_idx=int(column_entertime*self.pyFs)
+                end_idx=int((column_entertime+window)*self.pyFs)
+                para_event_photometry_data=column_photometry_data[start_idx:end_idx].reset_index(drop=True)
+                #print ('para_ENTER_photometry_data',para_event_photometry_data)
+                event_time_photometry_trace[f'pyData{col_num}'+'_enter']=para_event_photometry_data
+                fp.PETH_plot_zscore_diff_window(ax1, self.photometry_df[f'pyData{col_num}'],centre_time=
+                                  self.cheese_df[f'entertime{col_num}'][0], before_window=0,
+                                  after_window=window, fs=self.pyFs,color='blue',Label=f'Trace{col_num+1} enter time')
+            else:
+                length=(window)*self.pyFs
+                event_time_photometry_trace[f'pyData{col_num}'+'_enter']=pd.Series(np.nan, index=range(length))
+            
+            
+            column_well1time=self.cheese_df[f'well1time{col_num}'][0]
+            if not np.isnan(column_well1time).any():
+                start_idx=int((column_well1time-window)*self.pyFs)
+                end_idx=int((column_well1time)*self.pyFs)
+                para_event_photometry_data=column_photometry_data[start_idx:end_idx].reset_index(drop=True)
+                event_time_photometry_trace[f'pyData{col_num}'+'_beforewell1']=para_event_photometry_data
+                fp.PETH_plot_zscore_diff_window(ax2, self.photometry_df[f'pyData{col_num}'],centre_time=
+                                  self.cheese_df[f'well1time{col_num}'][0], before_window=window,
+                                  after_window=0, fs=self.pyFs,color='green',Label=f'Trace{col_num+1} before well1')
+            else:
+                length=(window)*self.pyFs
+                event_time_photometry_trace[f'pyData{col_num}'+'_beforewell1']=pd.Series(np.nan, index=range(length))
+           
+            column_leftwll1time=self.cheese_df[f'leftwell1time{col_num}'][0]
+            if not np.isnan(column_leftwll1time).any():
+                start_idx=int(column_leftwll1time*self.pyFs)
+                end_idx=int((column_leftwll1time+window)*self.pyFs)
+                para_event_photometry_data=column_photometry_data[start_idx:end_idx].reset_index(drop=True)
+                event_time_photometry_trace[f'pyData{col_num}'+'_leftwell1']=para_event_photometry_data
+                fp.PETH_plot_zscore_diff_window(ax3, self.photometry_df[f'pyData{col_num}'],centre_time=
+                                  self.cheese_df[f'leftwell1time{col_num}'][0], before_window=0,
+                                  after_window=window, fs=self.pyFs,color='green',Label=f'Trace{col_num+1} enter time')
+            else:
+                length=(window)*self.pyFs
+                event_time_photometry_trace[f'pyData{col_num}'+'_leftwell1']=pd.Series(np.nan, index=range(length))   
+           
+            column_well2time=self.cheese_df[f'well2time{col_num}'][0]
+            if not np.isnan(column_well2time).any():
+                start_idx=int((column_well2time-window)*self.pyFs)
+                end_idx=int((column_well2time)*self.pyFs)
+                para_event_photometry_data=column_photometry_data[start_idx:end_idx].reset_index(drop=True)
+                event_time_photometry_trace[f'pyData{col_num}'+'_beforewell2']=para_event_photometry_data
+                fp.PETH_plot_zscore_diff_window(ax4, self.photometry_df[f'pyData{col_num}'],centre_time=
+                                  self.cheese_df[f'well2time{col_num}'][0], before_window=window,
+                                  after_window=0, fs=self.pyFs,color='red',Label=f'Trace{col_num+1} before Well2')
+            else:
+                length=(window)*self.pyFs
+                event_time_photometry_trace[f'pyData{col_num}'+'_beforewell2']=pd.Series(np.nan, index=range(length))
+        plt.xlabel('Time (second)')
+        plt.ylabel('Value')
+        fig.suptitle('Event time traces '+self.animalID)
+        plt.tight_layout()
+        plt.show()
+        output_path = os.path.join(self.result_path, self.animalID+self.SessionID+str(window)+'sec_window_event_traces.png')
+        fig.savefig(output_path, bbox_inches='tight', pad_inches=0, transparent=True)
+        
+        'filtered each event and plot average'
+        filtered_columns = [col for col in event_time_photometry_trace.columns if col.endswith('_enter')]
+        entertime_PETH = event_time_photometry_trace[filtered_columns]
+        filtered_columns = [col for col in event_time_photometry_trace.columns if col.endswith('_beforewell1')]
+        before_well1_PETH= event_time_photometry_trace[filtered_columns]
+        filtered_columns = [col for col in event_time_photometry_trace.columns if col.endswith('_leftwell1')]
+        left_well1_PETH= event_time_photometry_trace[filtered_columns]
+        filtered_columns = [col for col in event_time_photometry_trace.columns if col.endswith('_beforewell2')]
+        before_well2_PETH= event_time_photometry_trace[filtered_columns]
+                                                                        
+        fig, ((ax1, ax2), (ax3, ax4))  = plt.subplots(2, 2, figsize=(10, 10))
+        fp.Plot_mean_With_CI_PSTH(entertime_PETH, 0, window, self.animalID, meancolor='grey', stdcolor='lightgrey', ax=ax1)
+        fp.Plot_mean_With_CI_PSTH(before_well1_PETH, window, 0, self.animalID, meancolor='green', stdcolor='lightgreen', ax=ax2)
+        fp.Plot_mean_With_CI_PSTH(left_well1_PETH, 0, window, self.animalID, meancolor='green', stdcolor='lightgreen', ax=ax3)
+        fp.Plot_mean_With_CI_PSTH(before_well2_PETH, window, 0, self.animalID, meancolor='red', stdcolor='lightcoral', ax=ax4)
+        output_path = os.path.join(self.result_path, self.animalID+self.SessionID+'_'+str(window)+'sec_window_event_average.png')
+        fig.savefig(output_path, bbox_inches='tight', pad_inches=0, transparent=True)
+
+        '''save the pkl file for the PETH data with half window time specified'''
+        filename=self.animalID+'_'+self.SessionID+'_'+str(window)+'sec_half_window_event_traces.pkl'
+        self.event_time_photometry_trace=event_time_photometry_trace
+        self.event_time_photometry_trace.to_pickle(os.path.join(self.result_path, filename))
+        return self.event_time_photometry_trace
     
     def plot_single_trial_2_rewards_PETH(self, trialIdx,before_well1_window, after_well2_window, color='blue', ax=None):
         'NEED TO MODIFY'
@@ -247,7 +347,7 @@ class pyCheeseSession:
             plt.show()
         return ax
 
-    def find_peaks_in_SBtrials (self):
+    def find_peaks_in_SBtrials (self,plot=False):
         py_target_string='py'
         files = os.listdir(self.pySBFolder)
         filtered_files = [file for file in files if py_target_string in file]  
@@ -284,14 +384,14 @@ class pyCheeseSession:
             
             with open(pkl_filepath, 'wb') as pkl_file:
                 pickle.dump(results_dict, pkl_file)
-                
-            plt.figure(figsize=(10, 3))
-            plt.plot(time, zdFF, label='Signal Trace')
-            plt.plot(time[peaks], zdFF[peaks], 'rx', label='Peaks')
-            plt.xlabel('Time')
-            plt.ylabel('Amplitude')
-            plt.title('Signal Trace with Peaks Labeled')
-            plt.legend()
-            plt.show()
+            if plot:    
+                plt.figure(figsize=(10, 3))
+                plt.plot(time, zdFF, label='Signal Trace')
+                plt.plot(time[peaks], zdFF[peaks], 'rx', label='Peaks')
+                plt.xlabel('Time')
+                plt.ylabel('Amplitude')
+                plt.title('Signal Trace with Peaks Labeled')
+                plt.legend()
+                plt.show()
         return -1
     
