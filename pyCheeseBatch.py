@@ -108,9 +108,9 @@ def plot_day_average_PETH_together(result_folder):
     return -1
 #%%
 'This is to call the above function to read all sessions in multiple days for an animal'
-grandparent_folder = '/Volumes/YifangExp/Mingshuai/workingfolder/Group A/Group A (cue)/'
+grandparent_folder = 'E:/Mingshuai/workingfolder/Group A/Group A (cue)/'
 output_folder = grandparent_folder+'output/'
-parent_list = ['1756072']
+parent_list = ['1756072','1746062','1756074']
 before_window=5
 after_window=5
 PlotSB = True
@@ -119,6 +119,8 @@ for i in range (len (parent_list)):
     COLD_folder = parent_folder+'Cold_folder/'
     save_folder = parent_folder
     result_folder = parent_folder+'results/'
+    if not os.path.exists(result_folder):
+        os.makedirs(result_folder)
     #Obtain total days
     total_days = -1
     for filename in os.listdir(COLD_folder):
@@ -135,6 +137,7 @@ for i in range (len (parent_list)):
             SB = True
     if not SB:
         PlotSB = False
+    print('Now reading in:'+parent_list[i])
     Read_MultiDays_Save_CB_SB_results (total_days,parent_folder,save_folder,COLD_folder,animalID,before_window,after_window,SB=SB)
 
     '''plot well1 and well2 average PETH for all sessions'''
