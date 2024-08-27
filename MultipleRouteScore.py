@@ -53,6 +53,7 @@ def ReadFiles (input_folder):
     csv_files = []
     for root, dirs, files in os.walk(input_folder):
         for filename in files:
+            print(filename)
             if filename.endswith('.csv'):
                 csv_file = input_file(root,filename) 
                 csv_files.append(csv_file)

@@ -369,7 +369,7 @@ def CalculateDifErrorBar (array1,array2):
     return std_tot
 
 def PlotRSDif (csv_file,day_column,column_name,ax,color='black',label = None,xlab = 'x', ylab = 'y',title = ''):
-    day_max = csv_file[day_column].max()
+    day_max = int(csv_file[day_column].max())
     x = []
     y = []
     eb = []
@@ -393,7 +393,7 @@ def PlotRSDif (csv_file,day_column,column_name,ax,color='black',label = None,xla
         ax.legend()
     return ax
 
-def PlotLagDif (df,day_column,column_name,ax,color='black',label = None,xlab = 'x', ylab = 'y',title = ''):
+def PlotLagDif (df,day_column,column_name,ax,color='black',label = None,xlab = 'x', ylab = 'y',title = '',axh = False):
     day_max = int(df[day_column].max())
     x = []
     y = []
@@ -408,7 +408,8 @@ def PlotLagDif (df,day_column,column_name,ax,color='black',label = None,xlab = '
     ax.errorbar(x, y, yerr=eb, fmt='-o', ecolor=color , color =color ,capsize=5, label=label)
     ax.set_xlabel(xlab)
     ax.set_ylabel(ylab)
-    ax.axhline(y=0, color='gray', linestyle='--', linewidth=1)
+    if (axh):
+        ax.axhline(y=0, color='gray', linestyle='--', linewidth=1)
     ax.set_xticks(x)
     ax.set_title(title)
     if label:
@@ -636,8 +637,8 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.
     lag_df1 = lag_data[~np.isnan(lag_data['Lag_dif1'])]
     lag_df2 = lag_data[~np.isnan(lag_data['Lag_dif2'])]
     fig_lag_dif1,lag_ax1 = plt.subplots(figsize=(7, 5))
-    PlotLagDif(lag_df1,'day','Lag_dif1',lag_ax1,color='black', label = 'after collecting preferred well', xlab = 'Day',ylab = 'Lag Difference')
-    PlotLagDif(lag_df2,'day','Lag_dif2',lag_ax1,color='green', label = 'after collecting less preferred well',xlab = 'Day',ylab = 'Lag Difference', title='z-score difference after collecting a reward')
+    PlotLagDif(lag_df1,'day','Lag_dif1',lag_ax1,color='black', label = 'after collecting preferred well', xlab = 'Day',ylab = 'Lag Difference',axh = True)
+    PlotLagDif(lag_df2,'day','Lag_dif2',lag_ax1,color='green', label = 'after collecting less preferred well',xlab = 'Day',ylab = 'Lag Difference', title='z-score difference after collecting a reward',axh = True)
     fig_lag_dif1.savefig(imp_folder+'lag_dif')
     
     fig_dif1,imp_ax1 = plt.subplots(figsize=(7, 5))
