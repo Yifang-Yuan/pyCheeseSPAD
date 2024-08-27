@@ -108,9 +108,9 @@ def plot_day_average_PETH_together(result_folder):
     return -1
 #%%
 'This is to call the above function to read all sessions in multiple days for an animal'
-grandparent_folder = 'E:/Mingshuai/workingfolder/Group B2/'
+grandparent_folder = '/Volumes/YifangExp/Mingshuai/workingfolder/Group A/Group A (cue)/'
 output_folder = grandparent_folder+'output/'
-parent_list = ['1786534','1786535']
+parent_list = ['1756072']
 before_window=5
 after_window=5
 PlotSB = True
