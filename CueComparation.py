@@ -25,23 +25,27 @@ class MousePair:
             df2 = self.non_cue_mouse.lag_file[~np.isnan(self.non_cue_mouse.lag_file[column_name])]
             RL.PlotLagDif(df1,'day',column_name,ax,color='black', xlab = 'Day',ylab = column_name,label='with cue',axh = True)
             RL.PlotLagDif(df2,'day',column_name,ax,color='green', xlab = 'Day',ylab = column_name,label='without cue',title=title,axh = True)
+            fig.savefig(self.output_folder+column_name+'.png')
         elif file_type == 'pf':
             df1 = self.cue_mouse.pf_file
             df2 = self.non_cue_mouse.pf_file
             RL.PlotLagDif(df1,'day',column_name,ax,color='black', xlab = 'Day',ylab = column_name,label='with cue')
             RL.PlotLagDif(df2,'day',column_name,ax,color='green', xlab = 'Day',ylab = column_name,label='without cue',title=title)
+            fig.savefig(self.output_folder+column_name+'_pf.png')
         elif file_type == 'lpf':
             df1 = self.cue_mouse.lpf_file
             df2 = self.non_cue_mouse.lpf_file
             RL.PlotLagDif(df1,'day',column_name,ax,color='black', xlab = 'Day',ylab = column_name,label='with cue')
             RL.PlotLagDif(df2,'day',column_name,ax,color='green', xlab = 'Day',ylab = column_name,label='without cue',title=title)
+            fig.savefig(self.output_folder+column_name+'_lpf.png')
         elif file_type == 'avg':
             df1 = self.cue_mouse.avg_file
             df2 = self.non_cue_mouse.avg_file
             RL.PlotLagDif(df1,'day',column_name,ax,color='black', xlab = 'Day',ylab = column_name,label='with cue')
             RL.PlotLagDif(df2,'day',column_name,ax,color='green', xlab = 'Day',ylab = column_name,label='without cue',title=title)
+            fig.savefig(self.output_folder+column_name+'.png')
         
-        fig.savefig(self.output_folder+column_name+'.png')
+        
     
     def Comparision (self,output_folder):
         self.output_folder = output_folder
@@ -49,7 +53,14 @@ class MousePair:
         self.Plot('lag','Lag_dif2',title='Comparision of change in signal after collecting the less preferred well',ylab='change of mean z-score before and after collection')
         self.Plot('pf','route_score',title='Comparision of route score for preferred well')
         self.Plot('lpf','route_score',title='Comparision of route score for less preferred well')
-        
+        self.Plot('pf','z_dif',title='Comparision of z_dif for preferred well')
+        self.Plot('lpf','z_dif',title='Comparision of z_dif for less preferred well')
+        if (self.cue_mouse.ContainSB and self.non_cue_mouse.ContainSB):
+            self.Plot('avg','SB_peak_frequency',title='Comparision of performance in starting box')
+            self.Plot('avg','SB_average_peak_value',title='Comparision of performance in starting box')
+            self.Plot('avg','SB_zdff_max',title='Comparision of performance in starting box')
+            
+            
 class Mouse:
     def __init__ (self,folder,ID):
         self.folder = folder
@@ -74,27 +85,31 @@ class Mouse:
                         self.ContainSB = True
         return
 
-def MainFunction(cue_grandpa_folder, non_cue_grandpa_folder,output_folder):
+def MainFunction(cue_parent_folder, non_cue_parent_folder,grandparent_folder):
     ID_list = []
-    cue_folder = cue_grandpa_folder+'output/'
-    non_cue_folder = non_cue_grandpa_folder+'output/'
+    cue_folder = cue_parent_folder+'output/'
+    non_cue_folder = non_cue_parent_folder+'output/'
     for filename in os.listdir(cue_folder):
         if (not '.' in filename) and (not 'learning' in filename):
             ID_list.append(filename)
     
     mouse_pair_list = []
     for i in range (len(ID_list)):
+        save_folder = grandparent_folder+'Comparision/'+ID_list[i]+'/'
+        print(save_folder)
+        if (not os.path.exists(save_folder)):
+            os.makedirs(save_folder)
         cue_mouse = Mouse(cue_folder+ID_list[i]+'/',ID_list[i])
         non_cue_mouse = Mouse(non_cue_folder+ID_list[i]+'/',ID_list[i])
         mouse_pair = MousePair(cue_mouse,non_cue_mouse)
         mouse_pair_list.append(mouse_pair)
-        mouse_pair.Comparision(output_folder)
+        mouse_pair.Comparision(save_folder)
     
     
     return
 
 #%%
-cue_grandpa_folder = '/Volumes/YifangExp/Mingshuai/workingfolder/Group A/Group A (cue)/'
-non_cue_grandpa_folder = '/Volumes/YifangExp/Mingshuai/workingfolder/Group A/Group A (non_cue)/'
-output_folder = '/Volumes/YifangExp/Mingshuai/workingfolder/Group A/comparision/'
-MainFunction(cue_grandpa_folder, non_cue_grandpa_folder,output_folder)
+cue_parent_folder = 'E:/Mingshuai/workingfolder/Group A/Group A (cue)/'
+non_cue_parent_folder = 'E:/Mingshuai/workingfolder/Group A/Group A (non_cue)/'
+grandparent_folder = 'E:/Mingshuai/workingfolder/Group A/'
+MainFunction(cue_parent_folder, non_cue_parent_folder,grandparent_folder)
