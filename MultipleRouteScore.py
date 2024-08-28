@@ -140,16 +140,29 @@ def PlotRSForMultipleMouse(input_folder,output_folder,y1_column='route_score',y2
     for i in range (len(csv_files)):
         if (csv_files[i].lag):
             continue
+        if (not csv_files[i].avg):
+            fig_zdif,ax = plt.subplots(figsize=(7, 5))
+            RL.PlotLagDif(csv_files[i].df,'day','pct_high',ax,color='blue', label = 'max signal before collecting the reward', xlab = 'Day',ylab = 'z-score of the signal')
+            RL.PlotLagDif(csv_files[i].df,'day','pct_low',ax,color='green', label = 'min signal after collecting the reward',xlab = 'Day',ylab = 'z-score of the signal')
+            
+            
         if (not csv_files[i].avg) and csv_files[i].pfw:
+            RL.PlotLagDif(csv_files[i].df,'day','z_dif',ax,color='black', label = 'z_dif',xlab = 'Day',ylab = 'z-score of the signal',title='z_dif for preferred well',axh=True)
+            
             op = output_folder+csv_files[i].ID
             if not os.path.exists(op):
                 os.makedirs(op)
+            fig_zdif.savefig(op+'/Preferred_Well_zdif.png')
             fig = PlotDoubleY(csv_files[i].df,y1_column,y2_column)
             fig.savefig(op+'/Preferred_Well_RS.png')
+            
         if (not csv_files[i].avg) and (not csv_files[i].pfw):
+            RL.PlotLagDif(csv_files[i].df,'day','z_dif',ax,color='black', label = 'z_dif',xlab = 'Day',ylab = 'z-score of the signal',title='z_dif for less preferred well',axh=True)
+
             op = output_folder+csv_files[i].ID
             if not os.path.exists(op):
                 os.makedirs(op)
+            fig_zdif.savefig(op+'/Less_Preferred_Well_zdif.png')
             fig = PlotDoubleY(csv_files[i].df,y1_column,y2_column)
             fig.savefig(op+'/Less_Preferred_Well_RS.png')
             
