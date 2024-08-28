@@ -75,10 +75,6 @@ class trail_route_score:
         self.z_min_avg = (self.z_min_1+self.z_min_2)/2
         self.z_max_avg = (self.z_max_1+self.z_max_2)/2
         self.route_score_avg = (self.well1_route_score+self.well2_route_score)/2
-        self.pct_h1 = np.percentile(self.z1,100-pct)
-        self.pct_l1 = np.percentile(self.z1,pct)
-        self.pct_h2 = np.percentile(self.z2,100-pct)
-        self.pct_l2 = np.percentile(self.z2,pct)
         z1_len = int(self.z1.shape[0]/2)
         z2_len = int(self.z2.shape[0]/2)
         z_1_a = self.z1.iloc[:z1_len]
@@ -91,6 +87,11 @@ class trail_route_score:
         z_2_a_max = np.percentile(z_2_a,100-pct)
         z_2_b_min = np.percentile(z_2_b,pct)
         self.z_dif_2 = z_2_a_max-z_2_b_min
+        
+        self.pct_h1 = z_1_a_max
+        self.pct_l1 = z_1_b_min
+        self.pct_h2 = z_2_a_max
+        self.pct_l2 = z_2_b_min
         return   
 
 class trails_tot:
@@ -413,7 +414,7 @@ def PlotLagDif (df,day_column,column_name,ax,color='black',label = None,xlab = '
     ax.set_xticks(x)
     ax.set_title(title)
     if label:
-        ax.legend()
+        ax.legend(loc='upper right')
         
 
 def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.5):
@@ -590,7 +591,7 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.
     fdf1 = pd.DataFrame(filtered_df1)
     fdf2 = pd.DataFrame(filtered_df2)
     
-    fdf1.to_csv(output_folder+mouse_ID+'_Preferred_Well_Route_Score.csv',index=False)
+    fdf1.to_csv(output_folder+mouse_ID+'_Preferred_Well_Route_Score',index=False)
     fdf2.to_csv(output_folder+mouse_ID+'_Less_Preferred_Well_Route_Score.csv',index=False)
     ax.set_xlabel('Trails')
     ax.set_ylabel('latency', color='black')
@@ -601,7 +602,7 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.
     AddVerticalLines(ax, axvline)
     fig_latency.tight_layout()
     fig_latency.savefig(output_folder+'Well_Latency')
-    
+    plt.close(fig_latency)
     fig_pfw = plt.figure(figsize=(10, 10))
     pfwx = fig_pfw.add_subplot(211)
     lpfwx = fig_pfw.add_subplot(212)
@@ -610,7 +611,7 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.
     pfwx.set_title('z_dif against route score for preferred wells')
     lpfwx.set_title('z_dif against route score for less preferred wells')
     fig_pfw.savefig(output_folder+'preferred_well_tot_plot')
-    
+    plt.close(fig_pfw)
     fig = plt.figure(figsize=(10, 30))
     ax1 = fig.add_subplot(711)
     ax2 = fig.add_subplot(712)
@@ -629,7 +630,7 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.
     PlotLinearRegression(ax7, np.array(tot_trails.route_score), tot_trails.z_dif, y_label='z_dif',x_label='route_score')
     
     fig.savefig(output_folder+'Total_CB_Plot')
-    
+    plt.close(fig)
     imp_folder = output_folder+'learning_curve/'
     if not os.path.exists(imp_folder):
         os.makedirs(imp_folder)
@@ -640,17 +641,17 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.
     PlotLagDif(lag_df1,'day','Lag_dif1',lag_ax1,color='black', label = 'after collecting preferred well', xlab = 'Day',ylab = 'Lag Difference',axh = True)
     PlotLagDif(lag_df2,'day','Lag_dif2',lag_ax1,color='green', label = 'after collecting less preferred well',xlab = 'Day',ylab = 'Lag Difference', title='z-score difference after collecting a reward',axh = True)
     fig_lag_dif1.savefig(imp_folder+'lag_dif')
-    
+    plt.close(fig_lag_dif1)
     fig_dif1,imp_ax1 = plt.subplots(figsize=(7, 5))
     PlotRSDif(filtered_df1,'day','route_score',imp_ax1,color='black', label = 'preferred well', xlab = 'Day',ylab = 'Route Score')
     PlotRSDif(filtered_df2,'day','route_score',imp_ax1,color='green', label = 'less preferred well',xlab = 'Day',ylab = 'Route Score')
     fig_dif1.savefig(imp_folder+'RouteScore')
-    
+    plt.close(fig_dif1)
     fig_dif5,imp_ax5 = plt.subplots(figsize=(7, 5))
     PlotRSDif(filtered_df1,'day','z_dif',imp_ax5,color='black', label = 'preferred well', xlab = 'Day',ylab = 'z_dif')
     PlotRSDif(filtered_df2,'day','z_dif',imp_ax5,color='green', label = 'less preferred well',xlab = 'Day',ylab = 'z_dif')
     fig_dif5.savefig(imp_folder+'z_dif')
-    
+    plt.close(fig_dif5)
     
     if (SB):
         fig_SB = plt.figure(figsize=(10, 30))
@@ -661,7 +662,7 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.
         PlotLinearRegression(SB_ax2, np.array(tot_trails.route_score_avg), tot_trails.SB_avg_PV, y_label='SB_average_peak_value',x_label='route_score_average')
         PlotLinearRegression(SB_ax3, np.array(tot_trails.route_score_avg), tot_trails.SB_zdff_max, y_label='SB_zdff_max',x_label='route_score_average')
         fig_SB.savefig(output_folder+'Total_SB_Plot')
-    
+        plt.close(fig_SB)
         fig_SB_time = plt.figure(figsize=(15, 30))
         SB_bx1 = fig_SB_time.add_subplot(411)
         SB_bx2 = fig_SB_time.add_subplot(412)
@@ -703,20 +704,20 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.
         SB_bx2.set_ylabel('average_peak_value_in_SB')
         SB_bx3.set_ylabel('zdff_max')
         fig_SB_time.savefig(output_folder+'Total_with_time_Plot')
-        
+        plt.close(fig_SB_time)
 
         fig_dif2,imp_ax2 = plt.subplots(figsize=(7, 5))
         PlotRSDif(RSA,'day','SB_peak_frequency',imp_ax2,color='black', xlab = 'Day',ylab = 'SB_peak_frequency')
         fig_dif2.savefig(imp_folder+'SB_peak_frequency')
-        
+        plt.close(fig_dif2)
         fig_dif3,imp_ax3 = plt.subplots(figsize=(7, 5))
         PlotRSDif(RSA,'day','SB_zdff_max',imp_ax3,color='black', xlab = 'Day',ylab = 'SB_zdff_max')
         fig_dif3.savefig(imp_folder+'SB_zdff_max')
-        
+        plt.close(fig_dif3)
         fig_dif4,imp_ax4 = plt.subplots(figsize=(7, 5))
         PlotRSDif(RSA,'day','SB_average_peak_value',imp_ax4,color='black', xlab = 'Day',ylab = 'SB_average_peak_value')
         fig_dif4.savefig(imp_folder+'SB_zdff_maxSB_average_peak_value')
-        
+        plt.close(fig_dif4)
         
 #%%
 # cold_folder = '/Users/zhumingshuai/Desktop/Programming/Photometry/input/1756072/1756072_cold/'
