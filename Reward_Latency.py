@@ -591,7 +591,7 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.
     fdf1 = pd.DataFrame(filtered_df1)
     fdf2 = pd.DataFrame(filtered_df2)
     
-    fdf1.to_csv(output_folder+mouse_ID+'_Preferred_Well_Route_Score',index=False)
+    fdf1.to_csv(output_folder+mouse_ID+'_Preferred_Well_Route_Score.csv',index=False)
     fdf2.to_csv(output_folder+mouse_ID+'_Less_Preferred_Well_Route_Score.csv',index=False)
     ax.set_xlabel('Trails')
     ax.set_ylabel('latency', color='black')
