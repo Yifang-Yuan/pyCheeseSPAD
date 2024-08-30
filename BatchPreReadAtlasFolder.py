@@ -126,8 +126,8 @@ def read_multiple_Atlas_bin_folder(mouse_folder,hotpixel_path,xxRange,yyRange,ne
             # Create the folder if it doesn't exist
             if not os.path.exists(save_folder):
                 os.makedirs(save_folder)
-            np.savetxt(os.path.join(save_folder,'Zscore_traceAll.csv'), z_score, delimiter=',', comments='')
-            np.savetxt(os.path.join(save_folder,'Green_traceAll.csv'), Trace_raw, delimiter=',', comments='')
+            np.savetxt(os.path.join(save_folder,'Zscore_trace.csv'), z_score, delimiter=',', comments='')
+            np.savetxt(os.path.join(save_folder,'Green_trace.csv'), Trace_raw, delimiter=',', comments='')
     return -1
 
 
