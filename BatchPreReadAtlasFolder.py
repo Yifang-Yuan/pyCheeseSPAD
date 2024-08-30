@@ -10,6 +10,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime
+import re
 
 def replace_outliers_with_avg(data, threshold):
     # Identify the outliers
@@ -84,7 +85,6 @@ def Remove_outliers_for_session (parent_folder,TargetfolderName='SyncRecording')
 def extract_timestamp(folder_name):
     # Assuming the timestamp is at the end in the format "YYYY-MM-DD_HH-MM"
     timestamp_str = folder_name.split('_')[-2]+ '_' +folder_name.split('_')[-1] 
-    print ('timestamp_str----',timestamp_str)
     # Convert the string to a datetime object
     return datetime.strptime(timestamp_str, '%Y-%m-%d_%H-%M')
 
@@ -99,11 +99,18 @@ def read_multiple_Atlas_bin_folder(mouse_folder,hotpixel_path,xxRange,yyRange,ne
         print ('day_folder--', day_folder)
         all_atlas_folders = os.listdir(day_folder)
         # Filter out only the folders (directories)
-        folders = [item for item in all_atlas_folders if os.path.isdir(os.path.join(day_folder, item))]
+        pattern = r'^Burst-RS-\d+frames-\d+Hz_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}$'
+
+        # Filter out only the folders (directories) that match the pattern
+        folders = [
+            item for item in all_atlas_folders
+            if os.path.isdir(os.path.join(day_folder, item)) and re.match(pattern, item)
+        ]
         # Sort folders by the extracted timestamp
         sorted_atlas_folders = sorted(folders, key=extract_timestamp)
         i=0
-        for directory in sorted_atlas_folders:
+        for atlas_folder in sorted_atlas_folders:
+            directory=os.path.join(day_folder, atlas_folder)
             print("current_atlas_Folder:", directory)
             Trace_raw,z_score=AtlasDecode.get_zscore_from_atlas_continuous (directory,hotpixel_path,
                                                                             xxrange= xxRange,yyrange= yyRange,fs=840,hotpixel_photon_thre=hotpixel_photon_thre)
@@ -119,9 +126,8 @@ def read_multiple_Atlas_bin_folder(mouse_folder,hotpixel_path,xxRange,yyRange,ne
             # Create the folder if it doesn't exist
             if not os.path.exists(save_folder):
                 os.makedirs(save_folder)
-            # np.savetxt(os.path.join(save_folder,'Zscore_traceAll.csv'), z_score, delimiter=',', comments='')
-            # np.savetxt(os.path.join(save_folder,'Green_traceAll.csv'), Trace_raw, delimiter=',', comments='')
-            # np.savetxt(os.path.join(save_folder,'Red_traceAll.csv'), Trace_raw, delimiter=',', comments='')
+            np.savetxt(os.path.join(save_folder,'Zscore_traceAll.csv'), z_score, delimiter=',', comments='')
+            np.savetxt(os.path.join(save_folder,'Green_traceAll.csv'), Trace_raw, delimiter=',', comments='')
     return -1
 
 
@@ -134,12 +140,15 @@ def main():
     hotpixel_path='E:/YYFstudy/OptoEphysAnalysis/Altas_hotpixel.csv'
     xxrange = [45, 85]
     yyrange = [50, 90]
-    # xxrange = [5, 55]
-    # yyrange = [25, 75]
-
-
+    
     mouse_folder='G:/Mingshuai_atlas/1769568_PV_mNeon/'
-    read_multiple_Atlas_bin_folder(mouse_folder,hotpixel_path,xxrange,yyrange,new_folder_name='Atlas_Trial')
+    read_multiple_Atlas_bin_folder(mouse_folder,hotpixel_path,xxrange,yyrange,new_folder_name='Atlas_Trial',hotpixel_photon_thre=300)
+    
+    mouse_folder='G:/Mingshuai_atlas/1804114_JediCA1/'
+    read_multiple_Atlas_bin_folder(mouse_folder,hotpixel_path,xxrange,yyrange,new_folder_name='Atlas_Trial',hotpixel_photon_thre=500)
+    
+    mouse_folder='G:/Mingshuai_atlas/1819287_mNeon/'
+    read_multiple_Atlas_bin_folder(mouse_folder,hotpixel_path,xxrange,yyrange,new_folder_name='Atlas_Trial',hotpixel_photon_thre=500)
     
     
 if __name__ == "__main__":

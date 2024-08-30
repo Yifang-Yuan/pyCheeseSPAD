@@ -9,8 +9,7 @@ from scipy.io import loadmat
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
-from SPADPhotometryAnalysis import SPADAnalysisTools as Analysis
-from SPADPhotometryAnalysis import photometry_functions as fp
+import photometry_functions as fp
 from scipy.ndimage import uniform_filter1d
 
 def loadPCFrame (readData):
