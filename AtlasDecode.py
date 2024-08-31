@@ -127,7 +127,7 @@ def get_trace_from_3d_pixel_array(pixel_array_all_frames,pixel_array,xxrange,yyr
     mean_values_over_time = np.mean(region_pixel_array, axis=(0, 1))
     return sum_values_over_time,mean_values_over_time,region_pixel_array
 
-def plot_trace(trace,ax, fs=1017, label="trace"):
+def plot_trace(trace,ax, fs=840, label="trace"):
     t=(len(trace)) / fs
     taxis = np.arange(len(trace)) / fs
     mean_trace = np.mean(trace)
@@ -141,7 +141,7 @@ def plot_trace(trace,ax, fs=1017, label="trace"):
     #ax.xaxis.set_visible(False)  # Hide x-axis
     #ax.yaxis.set_visible(False)  # Hide x-axis
     ax.set_xlim(0,t)
-    ax.legend(loc="upper right", frameon=False)
+    #ax.legend(loc="upper right", frameon=False)
     ax.set_xlabel('Time(second)')
     ax.set_ylabel('Photon Count')
     return ax

@@ -141,13 +141,7 @@ def main():
     xxrange = [45, 85]
     yyrange = [50, 90]
     
-    mouse_folder='G:/Mingshuai_atlas/1769568_PV_mNeon/'
-    read_multiple_Atlas_bin_folder(mouse_folder,hotpixel_path,xxrange,yyrange,new_folder_name='Atlas_Trial',hotpixel_photon_thre=300)
-    
-    mouse_folder='G:/Mingshuai_atlas/1804114_JediCA1/'
-    read_multiple_Atlas_bin_folder(mouse_folder,hotpixel_path,xxrange,yyrange,new_folder_name='Atlas_Trial',hotpixel_photon_thre=500)
-    
-    mouse_folder='G:/Mingshuai_atlas/1819287_mNeon/'
+    mouse_folder='G:/Mingshuai_atlas/1819287_mNeon/mNeon_others/'
     read_multiple_Atlas_bin_folder(mouse_folder,hotpixel_path,xxrange,yyrange,new_folder_name='Atlas_Trial',hotpixel_photon_thre=500)
     
     
