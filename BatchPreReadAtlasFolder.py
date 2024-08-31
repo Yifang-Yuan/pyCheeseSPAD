@@ -86,7 +86,7 @@ def extract_timestamp(folder_name):
     # Assuming the timestamp is at the end in the format "YYYY-MM-DD_HH-MM"
     timestamp_str = folder_name.split('_')[-2]+ '_' +folder_name.split('_')[-1] 
     # Convert the string to a datetime object
-    return datetime.strptime(timestamp_str, '%Y-%m-%d_%H-%M')
+    return datetime.strptime(timestamp_str,  '%Y-%m-%d_%H-%M')
 
 def read_multiple_Atlas_bin_folder(mouse_folder,hotpixel_path,xxRange,yyRange,new_folder_name='SyncRecording',hotpixel_photon_thre=500):
     '''When using this batch processing function, please make sure the ROI did not change for this whole experiment.'''
