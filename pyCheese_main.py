@@ -25,6 +25,11 @@ reward_event_window_traces=session1.Plot_multiple_PETH_different_window(before_w
 #%%
 half_window=4
 event_window_traces=session1.Event_time_single_side(half_window)
+event_window_traces=session1.Event_time_two_sides(half_window)
+#%%
+before_window=3
+after_window=10
+event_window_traces=session1.StartBox_twosides(before_window,after_window)
 #%%
 'photometry dataFrame and cheeseboard behaviour result dataFrame of current session'
 photometry_df=session1.photometry_df
