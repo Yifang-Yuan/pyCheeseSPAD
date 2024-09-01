@@ -28,7 +28,7 @@ def Read_MultiDays_Save_CB_SB_results (total_days,parent_folder,save_folder,COLD
         current_session=pyCheeseSession.pyCheeseSession(full_path_CB,bonsai_folder,COLD_folder,
                                                  COLD_filename,save_folder,animalID=animalID,SessionID=SessionID,pySBFolder=pySBFolder)
         current_session.Plot_multiple_PETH_different_window(before_window,after_window)
-        current_session.Event_time_to_pickle(window=4)
+        current_session.Event_time_single_side(window=4)
         if SB:
             current_session.find_peaks_in_SBtrials(plot=False)
     return -1
