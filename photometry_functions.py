@@ -333,10 +333,13 @@ def PETH_plot_zscore_diff_window(ax, zscore_sync,centre_time, before_window,afte
     time_in_seconds = np.linspace(-before_window, after_window, num_samples)
     #ax = plotSingleTrace (ax, zscore_sync[start_idx:end_idx], SamplingRate=fs,color=color,Label=None)
     ax.plot(time_in_seconds,zscore_sync[start_idx:end_idx], label=Label, color=color,alpha=0.5)
+    ax.legend()
     return ax
 
 def Plot_mean_With_CI_PSTH(event_window_traces, before_window, after_window, animalID, meancolor='blue', stdcolor='lightblue', ax=None):
     event_window_traces = event_window_traces.dropna(axis=1, how='all')
+    before_window=len(event_window_traces)/2
+    after_window=len(event_window_traces)/2
     mean_signal = event_window_traces.mean(axis=1)
     sem = stats.sem(event_window_traces, axis=1, nan_policy='omit')
     df = len(event_window_traces.columns) - 1
@@ -352,7 +355,7 @@ def Plot_mean_With_CI_PSTH(event_window_traces, before_window, after_window, ani
     ax.plot(time_in_seconds, mean_signal, label='Mean Signal', color=meancolor,linewidth=1)
     ax.fill_between(time_in_seconds, mean_signal - moe, mean_signal + moe, color=stdcolor, alpha=0.5, label='95% CI')
     #print (mean_signal - moe)
-    ax.axvline(x=event_time, color='red', linestyle='--', label='Event Time')
+    ax.axvline(x=event_time, color='red', linestyle='--')
     ax.set_xlabel('Time (second)')
     ax.set_ylabel('Value')
     ax.set_title('Mean Signal with CI ' + animalID)

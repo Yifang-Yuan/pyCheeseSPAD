@@ -12,6 +12,8 @@ import pandas as pd
 import Reward_Latency
 import re
 import MultipleRouteScore
+import plotCheese
+
 def Read_MultiDays_Save_CB_SB_results (total_days,parent_folder,save_folder,COLD_folder,animalID,before_window,after_window,SB=True):
     for day in range (1, total_days+1):
         day_py_folder = f'Day{day}_photometry_CB/'
@@ -29,88 +31,18 @@ def Read_MultiDays_Save_CB_SB_results (total_days,parent_folder,save_folder,COLD
                                                  COLD_filename,save_folder,animalID=animalID,SessionID=SessionID,pySBFolder=pySBFolder)
         current_session.Plot_multiple_PETH_different_window(before_window,after_window)
         current_session.Event_time_single_side(window=4)
+        current_session.Event_time_two_sides(window=4)
+        current_session.StartBox_twosides(before_window=3,after_window=10)
         if SB:
             current_session.find_peaks_in_SBtrials(plot=False)
     return -1
 
-def Concat_PETH_pkl_files (parent_folder, target_string='traces.pkl'):
-    dfs = []
-    files = os.listdir(parent_folder)
-    filtered_files = [file for file in files if target_string in file]
-    for filename in filtered_files:
-        print (filename)
-        # Read the DataFrame from the .pkl file
-        df = pd.read_pickle(os.path.join(parent_folder, filename))            
-        # Extract an index from the file name (you may need to customize this)
-        day_index = filename.split('_')[1] # Assuming the file names are like "1.pkl", "2.pkl", etc.            
-        # Rename the columns with the extracted index
-        df.columns = [f'{day_index}_{col}' for col in df.columns]            
-        # Append the DataFrame to the list
-        dfs.append(df)   
-        # Concatenate the DataFrames column-wise
-        result_df = pd.concat(dfs, axis=1)
-    return result_df
 
-def plot_2wells_PETH_all_trials (result_folder):
-    PSTH_collection=Concat_PETH_pkl_files (result_folder, target_string='win_traces')
-    filtered_columns = [col for col in PSTH_collection.columns if col.endswith('_1')]
-    Well1_PETH = PSTH_collection[filtered_columns]
-
-    filtered_columns = [col for col in PSTH_collection.columns if col.endswith('_2')]
-    Well2_PETH = PSTH_collection[filtered_columns]
-    '''plot'''
-    fig, ax = plt.subplots(figsize=(10, 4))
-    fp.Plot_mean_With_CI_PSTH(Well1_PETH, before_window, after_window, animalID, meancolor='green', stdcolor='lightgreen', ax=ax)
-
-    fig, ax = plt.subplots(figsize=(10, 4))
-    fp.Plot_mean_With_CI_PSTH(Well2_PETH, before_window, after_window, animalID, meancolor='red', stdcolor='lightcoral', ax=ax)
-
-    fig, ax = plt.subplots(figsize=(10, 4))
-    fp.Plot_mean_With_CI_PSTH(PSTH_collection, before_window, after_window, animalID, meancolor='blue', stdcolor='lightblue', ax=ax)
-    return Well1_PETH,Well2_PETH
-
-def plot_day_average_PETH_together(result_folder):
-    PSTH_collection=Concat_PETH_pkl_files (result_folder, target_string='win_traces')
-    fig, ax = plt.subplots(figsize=(6, 4))
-    filtered_columns = list(filter(lambda col: col.startswith('Day1') and col.endswith('_1'), PSTH_collection.columns))
-    Day_Well1_PETH = PSTH_collection[filtered_columns]
-    fp.Plot_mean_With_CI_PSTH(Day_Well1_PETH, before_window, after_window, animalID, meancolor='red', stdcolor='lightcoral', ax=ax)
-    filtered_columns = list(filter(lambda col: col.startswith('Day2') and col.endswith('_1'), PSTH_collection.columns))
-    Day_Well1_PETH = PSTH_collection[filtered_columns]
-    fp.Plot_mean_With_CI_PSTH(Day_Well1_PETH, before_window, after_window, animalID, meancolor='purple', stdcolor='pink', ax=ax)
-    filtered_columns = list(filter(lambda col: col.startswith('Day3') and col.endswith('_1'), PSTH_collection.columns))
-    Day_Well1_PETH = PSTH_collection[filtered_columns]
-    fp.Plot_mean_With_CI_PSTH(Day_Well1_PETH, before_window, after_window, animalID, meancolor='green', stdcolor='lightgreen', ax=ax)
-    filtered_columns = list(filter(lambda col: col.startswith('Day4') and col.endswith('_1'), PSTH_collection.columns))
-    Day_Well1_PETH = PSTH_collection[filtered_columns]
-    fp.Plot_mean_With_CI_PSTH(Day_Well1_PETH, before_window, after_window, animalID, meancolor='blue', stdcolor='lightblue', ax=ax)
-    filtered_columns = list(filter(lambda col: col.startswith('Day5') and col.endswith('_1'), PSTH_collection.columns))
-    Day_Well1_PETH = PSTH_collection[filtered_columns]
-    fp.Plot_mean_With_CI_PSTH(Day_Well1_PETH, before_window, after_window, animalID, meancolor='black', stdcolor='grey', ax=ax)
-    
-    fig, ax = plt.subplots(figsize=(6, 4))
-    filtered_columns = list(filter(lambda col: col.startswith('Day1') and col.endswith('_2'), PSTH_collection.columns))
-    Day_Well1_PETH = PSTH_collection[filtered_columns]
-    fp.Plot_mean_With_CI_PSTH(Day_Well1_PETH, before_window, after_window, animalID, meancolor='red', stdcolor='lightcoral', ax=ax)
-    filtered_columns = list(filter(lambda col: col.startswith('Day2') and col.endswith('_2'), PSTH_collection.columns))
-    Day_Well1_PETH = PSTH_collection[filtered_columns]
-    fp.Plot_mean_With_CI_PSTH(Day_Well1_PETH, before_window, after_window, animalID, meancolor='purple', stdcolor='pink', ax=ax)
-    filtered_columns = list(filter(lambda col: col.startswith('Day3') and col.endswith('_2'), PSTH_collection.columns))
-    Day_Well1_PETH = PSTH_collection[filtered_columns]
-    fp.Plot_mean_With_CI_PSTH(Day_Well1_PETH, before_window, after_window, animalID, meancolor='green', stdcolor='lightgreen', ax=ax)
-    filtered_columns = list(filter(lambda col: col.startswith('Day4') and col.endswith('_2'), PSTH_collection.columns))
-    Day_Well1_PETH = PSTH_collection[filtered_columns]
-    fp.Plot_mean_With_CI_PSTH(Day_Well1_PETH, before_window, after_window, animalID, meancolor='blue', stdcolor='lightblue', ax=ax)
-    filtered_columns = list(filter(lambda col: col.startswith('Day5') and col.endswith('_2'), PSTH_collection.columns))
-    Day_Well1_PETH = PSTH_collection[filtered_columns]
-    fp.Plot_mean_With_CI_PSTH(Day_Well1_PETH, before_window, after_window, animalID, meancolor='black', stdcolor='grey', ax=ax)
-
-    return -1
 #%%
 'This is to call the above function to read all sessions in multiple days for an animal'
-grandparent_folder = 'E:/Mingshuai/workingfolder/Group A/Group A (non_cue)/'
+grandparent_folder = 'D:/CheeseboardYY/GCaMP8m/'
 output_folder = grandparent_folder+'output/'
-parent_list = ['1756072','1746062','1756074']
+parent_list = ['1769565','1804115']
 before_window=5
 after_window=5
 PlotSB = True
@@ -138,14 +70,15 @@ for i in range (len (parent_list)):
     if not SB:
         PlotSB = False
     print('Now reading in:'+parent_list[i])
-    Read_MultiDays_Save_CB_SB_results (total_days,parent_folder,save_folder,COLD_folder,animalID,before_window,after_window,SB=SB)
+    #Read_MultiDays_Save_CB_SB_results (total_days,parent_folder,save_folder,COLD_folder,animalID,before_window,after_window,SB=SB)
 
     '''plot well1 and well2 average PETH for all sessions'''
     ''' you need to put all the PETH files with the same half window in the same folder '''
-    Well1_PETH,Well2_PETH=plot_2wells_PETH_all_trials (result_folder)
+    #plotCheese.plot_2wells_PETH_all_trials (result_folder,2,2,animalID)
+    #plotCheese.plot_day_average_PETH_together(result_folder,2,2,animalID)
+    plotCheese.plot_SB_PETH_all_trials (result_folder,3,5,animalID)
+    plotCheese.plot_day_average_SB_PETH_together (result_folder,3,5,animalID)
+        
+    #Reward_Latency.PlotRouteScoreGraph(COLD_folder,result_folder,output_folder)
 
-
-    plot_day_average_PETH_together(result_folder)
-    Reward_Latency.PlotRouteScoreGraph(COLD_folder,result_folder,output_folder)
-
-MultipleRouteScore.PlotRSForMultipleMouse(output_folder,output_folder,'route_score', 'z_dif')
+#MultipleRouteScore.PlotRSForMultipleMouse(output_folder,output_folder,'route_score', 'z_dif')
