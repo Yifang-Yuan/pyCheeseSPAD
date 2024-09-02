@@ -46,7 +46,7 @@ class input_file:
             self.avg = False
         else:
             print('ERROR! Please remove irrelevent csv files in '+folder)
-        
+        return 
         
 
 def ReadFiles (input_folder):
@@ -81,7 +81,6 @@ def GetDayAvg (csv_files):
         
 def PlotDoubleY (csv_files,y1_column,y2_column,xlab = 'x',ylab1 = 'y1',ylab2 = 'y2',day_column = 'day'):
     mean_df = csv_files.groupby(day_column).mean()
-    
     # Calculate the standard error of the mean (SEM)
     std_df = csv_files.groupby(day_column).std()
     count_df = csv_files.groupby(day_column).size()
@@ -140,6 +139,9 @@ def PlotRSForMultipleMouse(input_folder,output_folder,y1_column='route_score',y2
     for i in range (len(csv_files)):
         if (csv_files[i].lag):
             continue
+        op = output_folder+csv_files[i].ID
+        if not os.path.exists(op):
+            os.makedirs(op)
         if (not csv_files[i].avg):
             fig_zdif,ax = plt.subplots(figsize=(7, 5))
             RL.PlotLagDif(csv_files[i].df,'day','pct_high',ax,color='blue', label = 'max signal before collecting the reward', xlab = 'Day',ylab = 'z-score of the signal')
@@ -148,25 +150,29 @@ def PlotRSForMultipleMouse(input_folder,output_folder,y1_column='route_score',y2
             
         if (not csv_files[i].avg) and csv_files[i].pfw:
             RL.PlotLagDif(csv_files[i].df,'day','z_dif',ax,color='black', label = 'z_dif',xlab = 'Day',ylab = 'z-score of the signal',title='z_dif for preferred well',axh=True)
-            
-            op = output_folder+csv_files[i].ID
-            if not os.path.exists(op):
-                os.makedirs(op)
             fig_zdif.savefig(op+'/Preferred_Well_zdif.png')
             fig = PlotDoubleY(csv_files[i].df,y1_column,y2_column)
             fig.savefig(op+'/Preferred_Well_RS.png')
             
         if (not csv_files[i].avg) and (not csv_files[i].pfw):
             RL.PlotLagDif(csv_files[i].df,'day','z_dif',ax,color='black', label = 'z_dif',xlab = 'Day',ylab = 'z-score of the signal',title='z_dif for less preferred well',axh=True)
-
-            op = output_folder+csv_files[i].ID
-            if not os.path.exists(op):
-                os.makedirs(op)
             fig_zdif.savefig(op+'/Less_Preferred_Well_zdif.png')
             fig = PlotDoubleY(csv_files[i].df,y1_column,y2_column)
             fig.savefig(op+'/Less_Preferred_Well_RS.png')
+        if (csv_files[i].avg) and (csv_files[i].ContainSB):
+            sbop = output_folder+csv_files[i].ID+'/SB/'
+            if not os.path.exists(sbop):
+                os.makedirs(sbop)
+            fig_SBPK,ax1 = plt.subplots(figsize=(7, 5))
+            RL.PlotLagDif(csv_files[i].df,'day','SB_peak_frequency',ax1,color='green', xlab = 'Day',ylab = 'Transient frequency')
+            fig_SBPK.savefig(sbop+'SB_peak_frequency.png')
+            fig_SB_zdff,ax2 = plt.subplots(figsize=(7, 5))
+            RL.PlotLagDif(csv_files[i].df,'day','SB_zdff_max',ax2,color='green', xlab = 'Day',ylab = 'SB_zdff_max')
+            fig_SB_zdff.savefig(sbop+'SB_zdff_max.png')
+            fig_SB_APK,ax3 = plt.subplots(figsize=(7, 5))
+            RL.PlotLagDif(csv_files[i].df,'day','SB_average_peak_value',ax3,color='green', xlab = 'Day',ylab = 'SB_average_peak_value')
+            fig_SB_APK.savefig(sbop+'SB_average_peak_value.png')
             
-
     csv_files_norm_pfw,csv_files_norm_lpfw,csv_files_day_avg = IntegrateData(csv_files)
 
     fig = PlotDoubleY(csv_files_norm_pfw, y1_column,y2_column)
