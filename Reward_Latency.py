@@ -42,7 +42,7 @@ class trail_route_score:
     z_dif_1 = None
     z_dif_2 = None
     
-    def __init__ (self,well1_route_score,well2_route_score,well1_latency,well2_latency,z1,z2,day,SB_avg_PV,SB_NP,SB_zdff_max,l1,l2):
+    def __init__ (self,well1_route_score,well2_route_score,well1_latency,well2_latency,z1,z2,day,SB_avg_PV,SB_NP,SB_zdff_max,l1,l2,e_max,e_min,e_dif):
         self.well1_route_score = well1_route_score
         self.well2_route_score = well2_route_score
         self.well1_latency = well1_latency
@@ -55,6 +55,10 @@ class trail_route_score:
         self.SB_zdff_max = SB_zdff_max
         self.l1 = l1
         self.l2 = l2
+        self.e_min = e_min
+        self.e_max = e_max
+        self.e_dif = e_dif
+        
         
     def Calculate(self,pct):
         self.z_min_1 = 999999
@@ -144,11 +148,12 @@ class truncated_data:
         self.latency = latency
         self.is_preferred_well = is_preferred_well
     
-def ReadRouteScore (cold_folder, cold_file,pickle_folder,pickle_file,lag_file,day,pfw,percentile):
+def ReadRouteScore (cold_folder, cold_file,pickle_folder,pickle_file,lag_file,enter_file,day,pfw,percentile):
     route_score_array = []
     route_score_input = fp.read_cheeseboard_from_COLD(cold_folder, cold_file)
     input_z_score = pd.read_pickle(pickle_folder+pickle_file)
     input_lag_dif = pd.read_pickle(pickle_folder+lag_file)
+    input_enter = pd.read_pickle(pickle_folder+enter_file)
     SB_avg_PV = None
     SB_NP = None
     SB_zdff_max = None
@@ -166,6 +171,7 @@ def ReadRouteScore (cold_folder, cold_file,pickle_folder,pickle_file,lag_file,da
         well2_route_score = route_score_input['well2routescore'][i]
         filtered_z = input_z_score.filter(like='pyData'+str(i))
         filtered_l = input_lag_dif.filter(like='pyData'+str(i))
+        filtered_e = input_enter.filter(like='pyData'+str(i))
         for j in range (filtered_z.shape[1]):
             if (filtered_z.columns[j][-1]=='1'):
                 z1 = filtered_z.iloc[:,j]
@@ -181,6 +187,16 @@ def ReadRouteScore (cold_folder, cold_file,pickle_folder,pickle_file,lag_file,da
                 l3 = filtered_l.iloc[:,j]
             if ('beforewell2' in header):
                 l4 = filtered_l.iloc[:,j] 
+        for j in range (filtered_e.shape[1]):
+            header = filtered_l.columns[j]
+            if ('enter' in header):
+                e = filtered_e.iloc[:,j]
+        e390 = e[:390]
+        e_min = e390.min()
+        e_max = e390.max()
+        e_dif = e_max-e_min
+        if (e390.idxmax()<e390.idxmin()):
+            e_dif = -e_dif
         lag_dif1 = l2.mean()-l1.mean()
         lag_dif2 = l4.mean()-l3.mean()
         
@@ -206,7 +222,7 @@ def ReadRouteScore (cold_folder, cold_file,pickle_folder,pickle_file,lag_file,da
             well1_latency,well2_latency = well2_latency,well1_latency
             well1_route_score,well2_route_score = well2_route_score,well1_route_score
 
-        single_trail_score = trail_route_score(well1_route_score,well2_route_score,well1_latency,well2_latency,z1,z2,day,SB_avg_PV,SB_NP,SB_zdff_max,lag_dif1,lag_dif2)
+        single_trail_score = trail_route_score(well1_route_score,well2_route_score,well1_latency,well2_latency,z1,z2,day,SB_avg_PV,SB_NP,SB_zdff_max,lag_dif1,lag_dif2,e_max,e_min,e_dif)
         single_trail_score.Calculate(percentile)
         route_score_array.append(single_trail_score)    
     
@@ -332,15 +348,24 @@ def AppendLag (route_score_array,day):
     day_ID = []
     l1 = []
     l2 = []
+    e_max = []
+    e_min = []
+    e_dif = []
     for i in range (len(route_score_array)):
         if not np.isnan(route_score_array[i].l1) or not np.isnan(route_score_array[i].l2):
             trail_ID.append(int(i))
             day_ID.append(int(day))
             l1.append(route_score_array[i].l1)
             l2.append(route_score_array[i].l2)
+            e_max.append(route_score_array[i].e_max)
+            e_min.append(route_score_array[i].e_min) 
+            e_dif.append(route_score_array[i].e_dif)
     data = pd.DataFrame({
         'Lag_dif1': l1,
         'Lag_dif2': l2,
+        'Enter_max': e_max,
+        'Enter_min': e_min,
+        'Enter_dif': e_dif,
         'trail_ID': trail_ID,
         'day': day_ID
         })
@@ -431,7 +456,7 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.
             day = int(day)
             if(day>day_max):
                 day_max = day
-    files = [[None for _ in range(3)] for _ in range(day_max)]
+    files = [[None for _ in range(4)] for _ in range(day_max)]
     
     for filename in os.listdir(pickle_folder):
         if filename.endswith('.pkl'):
@@ -442,6 +467,8 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.
                 files[day-1][2] = filename
             elif 'win' in filename:
                 files[day-1][1] = filename
+            elif 'startbox' in filename:
+                files[day-1][3] = filename
             if 'SB' in filename:
                 SB = True
                 
@@ -478,7 +505,7 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.
         
     
     for i in range (len(files)):
-        route_score_array = ReadRouteScore(cold_folder, files[i][0],pickle_folder,files[i][1],files[i][2],i+1,pfw,percentile=percentile)
+        route_score_array = ReadRouteScore(cold_folder, files[i][0],pickle_folder,files[i][1],files[i][2],files[i][3],i+1,pfw,percentile=percentile)
         total_route_score_array.append(route_score_array)
     
     mouse_ID = files[0][1].split('_')[0]
@@ -493,6 +520,9 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.
     lag_data = pd.DataFrame({
         'Lag_dif1': [],
         'Lag_dif2': [],
+        'Enter_max': [],
+        'Enter_min': [],
+        'Enter_dif': [],
         'trail_ID': [],
         'day': []
         })
@@ -527,9 +557,7 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.
         tot_trails.trail_ID.extend(neo_ID)
         tot_trails.trail_ID_avg.extend(neo_ID_avg)
         neo_day += len(total_route_score_array[i])
-    
     lag_data.to_csv(output_folder+mouse_ID+'_Lag_dif.csv',index=False)
-    
     
     if (SB):
         data1 = {
@@ -653,6 +681,14 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.
     fig_dif5.savefig(imp_folder+'z_dif')
     plt.close(fig_dif5)
     
+    e_df = lag_data[~np.isnan(lag_data['Enter_dif'])]
+    fig_e,ex1 = plt.subplots(figsize=(7, 5))
+    PlotLagDif(e_df,'day','Enter_dif',ex1,color='black', label = 'enter dif', xlab = 'Day',ylab = 'Lag Difference',axh = True)
+    PlotLagDif(e_df,'day','Enter_max',ex1,color='green', label = 'enter max',xlab = 'Day',ylab = 'Lag Difference',axh = True)
+    PlotLagDif(e_df,'day','Enter_min',ex1,color='blue', label = 'enter min',xlab = 'Day',ylab = 'Lag Difference', title='z_dif in 3 seconds before entering cheeseboard',axh = True)
+    fig_e.savefig(imp_folder+'enter_dif')
+    plt.close(fig_e)
+    
     if (SB):
         fig_SB = plt.figure(figsize=(10, 30))
         SB_ax1 = fig_SB.add_subplot(311)
@@ -720,10 +756,9 @@ def PlotRouteScoreGraph (cold_folder, pickle_folder, output_folder,percentile=2.
         plt.close(fig_dif4)
         
 #%%
-# cold_folder = '/Users/zhumingshuai/Desktop/Programming/Photometry/input/1756072/1756072_cold/'
-# pkl_folder = '/Users/zhumingshuai/Desktop/Programming/Photometry/input/1756072/1756072_pkl/'
-# lag_folder = '/Users/zhumingshuai/Desktop/Programming/Photometry/WoW/'
-# output_folder = '/Users/zhumingshuai/Desktop/Programming/Photometry/output/'
+# cold_folder = 'E:/Mingshuai/workingfolder/Group C/1756077/Cold_folder/'
+# pkl_folder = 'E:/Mingshuai/workingfolder/Group C/1756077/results/'
+# output_folder = 'E:/Mingshuai/workingfolder/Group C/output/'
 # PlotRouteScoreGraph(cold_folder, pkl_folder, output_folder,percentile=2.5)
 
 
