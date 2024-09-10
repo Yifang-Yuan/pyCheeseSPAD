@@ -126,8 +126,6 @@ ax[1].set_title("Heatmap of Zscore")
 ax[1].tick_params(labelbottom=False)  # Remove x-tick labels
 ax[1].tick_params(bottom=False)  # Remove x-ticks
 
-
-
 # Plot wavelet analysis on the second axis (ax[1])
 plot_wavelet(ax[2], sst, frequency, power, Fs, colorBar=True, logbase=True)
 ax[2].set_title("Theta band")
@@ -142,12 +140,12 @@ plt.show()
 #%%
 fig, ax = plt.subplots(figsize=(12, 3))
 zscore_bandpass=band_pass_filter(zscore_smooth,130,180,Fs)
-sst,frequency,power,global_ws=Calculate_wavelet(zscore_bandpass,lowpassCutoff=200,Fs=Fs,scale=2)
+sst,frequency,power,global_ws=Calculate_wavelet(zscore_bandpass,lowpassCutoff=200,Fs=Fs,scale=4)
 plot_wavelet(ax,sst,frequency,power,Fs,colorBar=False,logbase=False)
 #%%
 fig, ax = plt.subplots(figsize=(12, 3))
 ax.plot(zscore_smooth)
-zscore_bandpass = butter_filter(zscore_raw, btype='low', cutoff=80, fs=Fs, order=5)
+zscore_bandpass = butter_filter(zscore_raw, btype='low', cutoff=150, fs=Fs, order=5)
 fig, ax = plt.subplots(figsize=(12, 3))
 ax.plot(zscore_bandpass)
 

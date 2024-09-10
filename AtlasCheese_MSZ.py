@@ -33,7 +33,7 @@ input_format_df = {
     'atlas_recording_time':30,    
     'before_win': 0.5,
     'after_win': 0.5,
-    'low_pass_filter_frequency': 50,
+    'low_pass_filter_frequency': 80,
     'parent_folder': 'G:/CheeseboardYY/Group D/1819287/',
     'MouseID': '1819287',
     'output_folder': 'SingleTrailPlot'
@@ -466,11 +466,11 @@ def MainFunction (input_format_df,mouse_ID):
     cold_files = ReadInFiles(input_format_df)
     PlotMousePETH (cold_files,input_format_df,mouse_ID)
     PlotMouseHeatMap(cold_files, input_format_df, mouse_ID)
-    return
+    return cold_files
 
 # atlas_folder = 'E:\Mingshuai\Group D\1769568/'
 # sync_folder = '/Users/zhumingshuai/Desktop/Programming/Data/Atlas/Sample/'
 # cold_folder = '/Users/zhumingshuai/Desktop/Programming/Data/Atlas/Sample/Training_Data_Day1.xlsx'
 # a = cold_file(cold_folder,sync_folder,atlas_folder,input_format_df)
  
-MainFunction(input_format_df,input_format_df['MouseID'])
+cold_files=MainFunction(input_format_df,input_format_df['MouseID'])
