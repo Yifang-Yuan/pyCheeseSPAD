@@ -338,9 +338,11 @@ def Plot_Single_RS (route_score_array,day,output_folder,SB=True):
         SB_bx2.set_ylabel('average_peak_value_in_SB')
         SB_bx3.set_ylabel('zdff_max')
         fig_SB_time.savefig(output_folder+'SB_with_time_'+filename_prefix+str(day))
+        plt.close(fig_SB_time)
         fig_SB.savefig(output_folder+'SB_'+filename_prefix+str(day))
-        
+        plt.close(fig_SB)
     fig.savefig(output_folder+'CB_'+filename_prefix+str(day))
+    plt.close(fig)
     return truncated_data(z_min, z_max, route_score, z_min_avg, z_max_avg, route_score_avg,pct_high,pct_low,z_dif,SB_avg_PV,SB_NP,SB_zdff_max,SB_avg_PV_U,SB_NP_U,SB_zdff_max_U,trail_ID,trail_ID_avg,z_dif_avg,day_ID,day_ID_avg,latency,is_preferred_well)
 
 def AppendLag (route_score_array,day):
