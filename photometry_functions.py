@@ -333,7 +333,7 @@ def PETH_plot_zscore_diff_window(ax, zscore_sync,centre_time, before_window,afte
     time_in_seconds = np.linspace(-before_window, after_window, num_samples)
     #ax = plotSingleTrace (ax, zscore_sync[start_idx:end_idx], SamplingRate=fs,color=color,Label=None)
     ax.plot(time_in_seconds,zscore_sync[start_idx:end_idx], label=Label, color=color,alpha=0.5)
-    ax.legend()
+    #ax.legend()
     return ax
 
 def Plot_mean_With_CI_PSTH(event_window_traces, before_window, after_window, animalID, meancolor='blue', stdcolor='lightblue', ax=None):
