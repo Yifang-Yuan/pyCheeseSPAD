@@ -14,6 +14,29 @@ from sklearn.linear_model import Lasso
 import pandas as pd
 import os
 from scipy import stats
+from scipy import signal
+
+def butter_filter(data, btype='low', cutoff=10, fs=9938.4, order=5): 
+    # cutoff and fs in Hz
+    nyq = 0.5 * fs
+    normal_cutoff = cutoff / nyq
+    b, a = signal.butter(order, normal_cutoff, btype=btype, analog=False)
+    y = signal.filtfilt(b, a, data, axis=0)
+    return y
+
+def band_pass_filter(data,low_freq,high_freq,Fs):
+    data_high=butter_filter(data, btype='high', cutoff=low_freq,fs=Fs, order=5)
+    data_low=butter_filter(data_high, btype='low', cutoff=high_freq, fs=Fs, order=5)
+    return data_low
+
+def notchfilter (data,f0=100,bw=10,fs=840):
+    # Bandwidth of the notch filter (in Hz)   
+    Q = f0/bw # Quality factor
+    b, a = signal.iirnotch(f0, Q, fs)
+    for _ in range(5):
+        data = signal.filtfilt(b, a, data)
+    return data
+
 '''
 get_zdFF.py calculates standardized dF/F signal based on calcium-idependent 
 and calcium-dependent signals commonly recorded using fiber photometry calcium imaging
