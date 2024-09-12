@@ -69,6 +69,21 @@ class Mouse:
         output_path = os.path.join(output_path,'Mouse'+str(self.ID)+'_heatmap.png')
         plt.savefig(output_path)
         plt.close()
+        
+        plt.figure(figsize=(10, 6))
+        plt.clf()
+        self.std_MouseDf = (self.MouseDf - self.MouseDf.mean()) / self.MouseDf.std()
+        seaborn.heatmap(self.std_MouseDf.T,vmax=3,vmin=-3)
+        
+        plt.axvline(x=self.target_len/2,color='blue', linestyle='--')
+        label = np.arange(-self.p['before_win'],self.p['after_win']+1,step=1)
+        tick_positions = np.linspace(0, self.std_MouseDf.shape[0]-1,len(label))
+        plt.xticks(ticks = tick_positions,labels=label)
+        output_path = self.pkl_path
+        output_path = os.path.join(output_path,'Mouse'+str(self.ID)+'_heatmap(std).png')
+        plt.savefig(output_path)
+        plt.close()
+        
         return 
     
     
