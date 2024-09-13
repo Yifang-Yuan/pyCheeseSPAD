@@ -17,7 +17,6 @@ import heatmap
 import numpy as np
 from scipy import stats
 
-
 total_days = -1
 
 def Read_MultiDays_Save_CB_SB_results (total_days,parent_folder,save_folder,COLD_folder,animalID,before_window,after_window,SB=True):
@@ -82,15 +81,13 @@ def ObtainCI (df):
 'This is to call the above function to read all sessions in multiple days for an animal'
 grandparent_folder = 'G:/CheeseboardYY/GCaMP8m/'
 output_folder = grandparent_folder+'output/'
-parent_list = ['1804115']
-before_window=5
-after_window=5
+parent_list = ['1681628','1769565','1804115']
 PlotSB = True
 
 parameter_df = {
     'frame_rate':130,
-    'before_win':5,
-    'after_win':5,
+    'before_win':3,
+    'after_win':3,
     'pkl_folder_tag': 'results'
     }
 mouses = []
@@ -125,9 +122,9 @@ for i in range (len (parent_list)):
 
     '''plot well1 and well2 average PETH for all sessions'''
     ''' you need to put all the PETH files with the same half window in the same folder '''
-    plotCheese.plot_2wells_PETH_all_trials (result_folder,2,2,animalID)
-    plotCheese.plot_day_average_PETH_together(result_folder,2,2,animalID)
-    plotCheese.plot_SB_PETH_all_trials (result_folder,3,5,animalID)
+    # plotCheese.plot_2wells_PETH_all_trials (result_folder,2,2,animalID)
+    # plotCheese.plot_day_average_PETH_together(result_folder,2,2,animalID)
+    # plotCheese.plot_SB_PETH_all_trials (result_folder,3,5,animalID)
     plotCheese.plot_day_average_SB_PETH_together (result_folder,3,5,animalID)
     
     Reward_Latency.PlotRouteScoreGraph(COLD_folder,result_folder,output_folder)
@@ -137,5 +134,5 @@ for i in range (len (parent_list)):
     Integration(mouses,parameter_df,output_folder)
     
     
-MultipleRouteScore.PlotRSForMultipleMouse(output_folder,output_folder,'route_score', 'z_dif')
+#MultipleRouteScore.PlotRSForMultipleMouse(output_folder,output_folder,'route_score', 'z_dif')
 
