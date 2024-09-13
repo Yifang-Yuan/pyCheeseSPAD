@@ -134,8 +134,8 @@ class pyCheeseSession:
                     cheese_df['well1time'+target_index]=pd.Series(real_well1time)
                     cheese_df['well2time'+target_index]=pd.Series(real_well2time)
                     cheese_df['leftwell1time'+target_index]=pd.Series(leftfirstwell_time)
-            self.photometry_df=photometry_df
-            self.cheese_df=cheese_df
+        self.photometry_df=photometry_df
+        self.cheese_df=cheese_df
         return self.photometry_df,self.cheese_df
         
     def Plot_multiple_PETH_different_window(self,before_window,after_window):
