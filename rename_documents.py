@@ -6,9 +6,9 @@ Created on Mon Aug 26 22:00:30 2024
 @author: zhumingshuai
 """
 import os
-folder_path = 'E:/Mingshuai/workingfolder/Group A/Group A (cue)/1746062/'
-old_substring = '1054'
-new_substring = '1746062'
+folder_path = 'E:/Mingshuai/workingfolder/Group D/'
+old_substring = 'Green_traceAll'
+new_substring = 'Green_trace'
 for dirpath, dirnames, filenames in os.walk(folder_path):
     for filename in filenames:
         if old_substring in filename:

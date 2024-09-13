@@ -131,6 +131,7 @@ def PlotTwoDif (data_frame_pfw, data_frame_lpfw, data_frame_SB,output_folder):
     RL.PlotRSDif(data_frame_lpfw,'day','z_dif',imp_ax5,color='green', label = 'less preferred well',xlab = 'Day',ylab = 'z_dif')
     fig_dif5.savefig(imp_folder+'z_dif')
     
+    plt.close()
     return
     
 
