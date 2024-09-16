@@ -324,11 +324,11 @@ def adjust_time_to_photometry(cheeaseboard_session_data,trial_index,Sync_Start_t
     leftfirstwell_time_COLD=cheeaseboard_session_data['leftfirstwell_s'][trial_index]
     
     entertime=startingtime_COLD-Sync_Start_time
-    if not well1time_COLD==120:
+    if not well1time_COLD>=120:
         well1time=(well1time_COLD+startingtime_COLD)-Sync_Start_time
     else:
         well1time=float('nan')
-    if not well2time_COLD==120:    
+    if not well2time_COLD>=120:    
         well2time=(well2time_COLD+startingtime_COLD)-Sync_Start_time
     else:
         well2time=float('nan')

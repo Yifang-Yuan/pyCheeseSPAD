@@ -52,6 +52,8 @@ def Integration (mouses,parameter_df,output_folder):
         day_column = 'Day'+str(Day)
         for mouse in mouses:
             PETH_df = pd.DataFrame(columns=['mean', 'UB', 'LB'])
+            if not day_column in mouse.MouseDf.columns:
+                continue
             for i in range (mouse.MouseDf[day_column].shape[0]):
                 df = mouse.MouseDf[day_column].iloc[i,:]
                 PETH_df = pd.concat([PETH_df,ObtainCI(df)],ignore_index=True)
@@ -79,15 +81,15 @@ def ObtainCI (df):
     return data
 #%%
 'This is to call the above function to read all sessions in multiple days for an animal'
-grandparent_folder = 'G:/CheeseboardYY/GCaMP8m/'
+grandparent_folder = 'E:/workingfolder/Group E/'
 output_folder = grandparent_folder+'output/'
-parent_list = ['1681628','1769565','1804115']
+parent_list = ['1786534' ,'1786535','1756077','1758689','1772109']#
 PlotSB = True
 
 parameter_df = {
     'frame_rate':130,
-    'before_win':3,
-    'after_win':3,
+    'before_win':5,
+    'after_win':5,
     'pkl_folder_tag': 'results'
     }
 mouses = []
@@ -122,17 +124,17 @@ for i in range (len (parent_list)):
 
     '''plot well1 and well2 average PETH for all sessions'''
     ''' you need to put all the PETH files with the same half window in the same folder '''
-    # plotCheese.plot_2wells_PETH_all_trials (result_folder,2,2,animalID)
-    # plotCheese.plot_day_average_PETH_together(result_folder,2,2,animalID)
-    # plotCheese.plot_SB_PETH_all_trials (result_folder,3,5,animalID)
+    plotCheese.plot_2wells_PETH_all_trials (result_folder,2,2,animalID)
+    plotCheese.plot_day_average_PETH_together(result_folder,2,2,animalID)
+    plotCheese.plot_SB_PETH_all_trials (result_folder,3,5,animalID)
     plotCheese.plot_day_average_SB_PETH_together (result_folder,3,5,animalID)
     
-    Reward_Latency.PlotRouteScoreGraph(COLD_folder,result_folder,output_folder)
+    # Reward_Latency.PlotRouteScoreGraph(COLD_folder,result_folder,output_folder)
     
     
     mouses.append(heatmap.Main(parameter_df,animalID,parent_folder))
     Integration(mouses,parameter_df,output_folder)
     
     
-#MultipleRouteScore.PlotRSForMultipleMouse(output_folder,output_folder,'route_score', 'z_dif')
+MultipleRouteScore.PlotRSForMultipleMouse(output_folder,output_folder,'route_score', 'z_dif')
 

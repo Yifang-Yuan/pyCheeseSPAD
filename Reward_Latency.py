@@ -157,7 +157,7 @@ def ReadRouteScore (cold_folder, cold_file,pickle_folder,pickle_file,lag_file,en
     SB_avg_PV = None
     SB_NP = None
     SB_zdff_max = None
-
+    
     for i in range (route_score_input.shape[0]):
         
         SB_filename = 'Day'+str(day)+'_trial'+str(i)
@@ -221,7 +221,6 @@ def ReadRouteScore (cold_folder, cold_file,pickle_folder,pickle_file,lag_file,en
             lag_dif1,lag_dif2 = lag_dif2,lag_dif1
             well1_latency,well2_latency = well2_latency,well1_latency
             well1_route_score,well2_route_score = well2_route_score,well1_route_score
-
         single_trail_score = trail_route_score(well1_route_score,well2_route_score,well1_latency,well2_latency,z1,z2,day,SB_avg_PV,SB_NP,SB_zdff_max,lag_dif1,lag_dif2,e_max,e_min,e_dif)
         single_trail_score.Calculate(percentile)
         route_score_array.append(single_trail_score)    
