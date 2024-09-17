@@ -19,7 +19,7 @@ import scipy.signal as signal
 import pickle
 
 class pyCheeseSession:
-    def __init__(self, pyFolder, bonsai_folder,CheeseFolder,COLD_filename,save_folder,animalID='mice1',SessionID='Day1',pySBFolder=None):
+    def __init__(self, pyFolder, bonsai_folder,CheeseFolder,COLD_filename,save_folder,animalID='mice1',SessionID='Day1',pySBFolder=None,CamFs = 24):
         '''
         Parameters
         ----------
@@ -33,7 +33,7 @@ class pyCheeseSession:
         '''
         'Define photometry recording sampling rate and Camera frame rate '
         self.pyFs=130
-        self.CamFs=16
+        self.CamFs=CamFs
         self.pyFolder=pyFolder
         self.bonsai_folder = bonsai_folder
         self.CheeseFolder=CheeseFolder
@@ -159,11 +159,9 @@ class pyCheeseSession:
                 fp.PETH_plot_zscore_diff_window(ax1, self.photometry_df[f'pyData{col_num}'],centre_time=
                                  self.cheese_df[f'well1time{col_num}'][0], before_window=before_window,
                                  after_window=after_window, fs=self.pyFs,color='green',Label=f'Trace{col_num+1} Well1time')
-                print('well1 good')
             else:
                 length=(before_window+after_window)*self.pyFs
                 reward_event_window_traces[f'pyData{col_num}'+'_1']=pd.Series(np.nan, index=range(length))
-                print('well1 not')
             column_well2time=self.cheese_df[f'well2time{col_num}'][0]
             if not np.isnan(column_well2time).any():
                 start_idx=int((column_well2time-before_window)*self.pyFs)
@@ -173,11 +171,9 @@ class pyCheeseSession:
                 fp.PETH_plot_zscore_diff_window(ax2, self.photometry_df[f'pyData{col_num}'],centre_time=
                                  self.cheese_df[f'well2time{col_num}'][0], before_window=before_window,
                                  after_window=after_window, fs=self.pyFs,color='red',Label=f'Trace{col_num+1} Well2time')
-                print('well2 good')
             else:
                 length=(before_window+after_window)*self.pyFs
                 reward_event_window_traces[f'pyData{col_num}'+'_2']=pd.Series(np.nan, index=range(length))
-                print('well2 not')
         ax1.axvline(x=event_time, color='red', linestyle='--', label='Event Time') 
         ax2.axvline(x=event_time, color='red', linestyle='--', label='Event Time') 
         ax1.set_title("1st reached reward")
