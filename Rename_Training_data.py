@@ -11,7 +11,7 @@ import openpyxl
 import re
 import os
 
-input_folder = 'E:/Mingshuai/workingfolder/Group A/Group A (non_cue)/1721126/Cold_folder/'
+input_folder = '//cmvm.datastore.ed.ac.uk/cmvm/sbms/users/s2764793/Win7/Desktop/Mingshuai/Group E/1084/'
 input_file = 'Training Data.xlsx'
 file_name_column = 'name'
 output_folder_prefix = input_folder
@@ -47,19 +47,20 @@ class Mouse:
 def ReadData (training_data, row_index):
     name = training_data.iloc[row_index,0]
     probe = False
-    if 'day' in name:
-        split_name = name.split('day')
-    elif 'Day' in name:
-        split_name = name.split('Day')
-    elif 'Probe' in name:
+    
+    if 'Probe' in name:
         probe = True
         split_name = name.split('Probe')
     elif 'probe' in name:
         probe = True
         split_name = name.split('probe')
+    elif 'day' in name:
+        split_name = name.split('day')
+    elif 'Day' in name:
+        split_name = name.split('Day')
     else:
         print ('Error! Day not found!')
-    
+    print(name)
     #obtain all numbers in the substring after 'day'
     numbers_in_name = re.findall(r'\d+', split_name[1])
     mouse_ID = re.findall(r'\d+', split_name[0])[0]
@@ -120,7 +121,7 @@ for i in range (training_data.shape[0]):
 
 for i in range(len(mouse_list)):
     mouse_list[i].SortTrails()
-    output_folder = output_folder_prefix+str(mouse_list[i].ID)+'/'
+    output_folder = output_folder_prefix+str(mouse_list[i].ID)+'_Cold_folder/'
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
     for j in range (1,mouse_list[i].max_day+1):

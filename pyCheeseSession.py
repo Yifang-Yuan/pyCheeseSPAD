@@ -48,7 +48,7 @@ class pyCheeseSession:
         if not pySBFolder==None:
             self.pySBFolder=pySBFolder
             self.sort_py_files(self.pySBFolder)
-        self.form_pyCheesed_data_to_pandas()  
+        self.form_pyCheesed_data_to_pandas() 
         
     def sort_py_files (self,folder):
         original_pattern = re.compile(r'(\w+)-(\d{4}-\d{2}-\d{2}-\d{6})(\.csv)?$')
