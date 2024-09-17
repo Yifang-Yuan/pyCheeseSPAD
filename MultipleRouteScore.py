@@ -103,22 +103,22 @@ def PlotDoubleY (csv_files,y1_column,y2_column,xlab = 'x',ylab1 = 'y1',ylab2 = '
     fig.tight_layout()
     return fig
 
-def PlotTwoDif (data_frame_pfw, data_frame_lpfw, data_frame_SB,output_folder):
+def PlotTwoDif (data_frame_pfw, data_frame_lpfw, data_frame_SB,output_folder,tot_SB):
     imp_folder = output_folder+'learning_curve/'
     if not os.path.exists(imp_folder):
         os.makedirs(imp_folder)
-    
-    fig_dif2,imp_ax2 = plt.subplots(figsize=(7, 5))
-    RL.PlotRSDif(data_frame_SB,'day','SB_peak_frequency',imp_ax2,color='black', xlab = 'Day',ylab = 'SB_peak_frequency')
-    fig_dif2.savefig(imp_folder+'SB_peak_frequency')
-    
-    fig_dif3,imp_ax3 = plt.subplots(figsize=(7, 5))
-    RL.PlotRSDif(data_frame_SB,'day','SB_zdff_max',imp_ax3,color='black', xlab = 'Day',ylab = 'SB_zdff_max')
-    fig_dif3.savefig(imp_folder+'SB_zdff_max')
-    
-    fig_dif4,imp_ax4 = plt.subplots(figsize=(7, 5))
-    RL.PlotRSDif(data_frame_SB,'day','SB_average_peak_value',imp_ax4,color='black', xlab = 'Day',ylab = 'SB_average_peak_value')
-    fig_dif4.savefig(imp_folder+'SB_zdff_maxSB_average_peak_value')
+    if tot_SB:
+        fig_dif2,imp_ax2 = plt.subplots(figsize=(7, 5))
+        RL.PlotRSDif(data_frame_SB,'day','SB_peak_frequency',imp_ax2,color='black', xlab = 'Day',ylab = 'SB_peak_frequency')
+        fig_dif2.savefig(imp_folder+'SB_peak_frequency')
+        
+        fig_dif3,imp_ax3 = plt.subplots(figsize=(7, 5))
+        RL.PlotRSDif(data_frame_SB,'day','SB_zdff_max',imp_ax3,color='black', xlab = 'Day',ylab = 'SB_zdff_max')
+        fig_dif3.savefig(imp_folder+'SB_zdff_max')
+        
+        fig_dif4,imp_ax4 = plt.subplots(figsize=(7, 5))
+        RL.PlotRSDif(data_frame_SB,'day','SB_average_peak_value',imp_ax4,color='black', xlab = 'Day',ylab = 'SB_average_peak_value')
+        fig_dif4.savefig(imp_folder+'SB_zdff_maxSB_average_peak_value')
     
     fig_dif1,imp_ax1 = plt.subplots(figsize=(7, 5))
     RL.PlotRSDif(data_frame_pfw,'day','route_score',imp_ax1,color='black', label = 'preferred well', xlab = 'Day',ylab = 'Route Score')
@@ -136,6 +136,7 @@ def PlotTwoDif (data_frame_pfw, data_frame_lpfw, data_frame_SB,output_folder):
 
 def PlotRSForMultipleMouse(input_folder,output_folder,y1_column='route_score',y2_column='z_dif'):
     csv_files = ReadFiles(input_folder)
+    tot_SB = True
     for i in range (len(csv_files)):
         if (csv_files[i].lag):
             continue
@@ -172,6 +173,8 @@ def PlotRSForMultipleMouse(input_folder,output_folder,y1_column='route_score',y2
             fig_SB_APK,ax3 = plt.subplots(figsize=(7, 5))
             RL.PlotLagDif(csv_files[i].df,'day','SB_average_peak_value',ax3,color='green', xlab = 'Day',ylab = 'SB_average_peak_value')
             fig_SB_APK.savefig(sbop+'SB_average_peak_value.png')
+        if (csv_files[i].avg) and not (csv_files[i].ContainSB):
+            tot_SB = False
             
     csv_files_norm_pfw,csv_files_norm_lpfw,csv_files_day_avg = IntegrateData(csv_files)
 
@@ -184,7 +187,7 @@ def PlotRSForMultipleMouse(input_folder,output_folder,y1_column='route_score',y2
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
     fig.savefig(output_folder+'Less_Preferred_well_Tot.png')
-    PlotTwoDif(csv_files_norm_pfw, csv_files_norm_lpfw, csv_files_day_avg,output_folder)
+    PlotTwoDif(csv_files_norm_pfw, csv_files_norm_lpfw, csv_files_day_avg,output_folder, tot_SB)
 
     return
                 
