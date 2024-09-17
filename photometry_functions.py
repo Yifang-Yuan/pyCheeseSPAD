@@ -359,10 +359,10 @@ def PETH_plot_zscore_diff_window(ax, zscore_sync,centre_time, before_window,afte
     #ax.legend()
     return ax
 
-def Plot_mean_With_CI_PSTH(event_window_traces, before_window, after_window, animalID, meancolor='blue', stdcolor='lightblue', ax=None):
+def Plot_mean_With_CI_PSTH(event_window_traces, before_window, after_window, animalID, meancolor='blue', stdcolor='lightblue', ax=None,Fs=130):
     event_window_traces = event_window_traces.dropna(axis=1, how='all')
-    before_window=len(event_window_traces)/2
-    after_window=len(event_window_traces)/2
+    before_window=len(event_window_traces)/2/Fs
+    after_window=len(event_window_traces)/2/Fs
     mean_signal = event_window_traces.mean(axis=1)
     sem = stats.sem(event_window_traces, axis=1, nan_policy='omit')
     df = len(event_window_traces.columns) - 1

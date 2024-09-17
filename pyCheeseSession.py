@@ -42,7 +42,6 @@ class pyCheeseSession:
         self.COLD_resultfilename=COLD_filename
         self.save_folder=save_folder
         self.sort_py_files(self.pyFolder)
-        
         self.result_path = os.path.join(self.save_folder, 'results')
         if not os.path.exists(self.result_path):
             os.makedirs(self.result_path)
@@ -134,10 +133,10 @@ class pyCheeseSession:
                     cheese_df['well1time'+target_index]=pd.Series(real_well1time)
                     cheese_df['well2time'+target_index]=pd.Series(real_well2time)
                     cheese_df['leftwell1time'+target_index]=pd.Series(leftfirstwell_time)
-            self.photometry_df=photometry_df
-            filename=self.animalID+'_'+self.SessionID+'_'+'full_trial_zscore.pkl'
-            self.photometry_df.to_pickle(os.path.join(self.result_path, filename))
-            self.cheese_df=cheese_df
+        self.photometry_df=photometry_df
+        filename=self.animalID+'_'+self.SessionID+'_'+'full_trial_zscore.pkl'
+        self.photometry_df.to_pickle(os.path.join(self.result_path, filename))
+        self.cheese_df=cheese_df
         return self.photometry_df,self.cheese_df
         
     def Plot_multiple_PETH_different_window(self,before_window,after_window):

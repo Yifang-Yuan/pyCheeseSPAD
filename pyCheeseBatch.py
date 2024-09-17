@@ -42,8 +42,9 @@ def Read_MultiDays_Save_CB_SB_results (total_days,parent_folder,save_folder,COLD
         current_session.StartBox_twosides(before_window=3,after_window=10)
         if SB:
             current_session.find_peaks_in_SBtrials(plot=False)
-    return -1
+    return current_session
 
+# This function plot signals within the windows from different days within the same figure
 def Integration (mouses,parameter_df,output_folder):
     target_len = (parameter_df['before_win']+parameter_df['after_win'])*parameter_df['frame_rate']
     time = np.arange(0,target_len)/parameter_df['frame_rate']-parameter_df['before_win']
@@ -56,6 +57,8 @@ def Integration (mouses,parameter_df,output_folder):
             for i in range (mouse.MouseDf[day_column].shape[0]):
                 df = mouse.MouseDf[day_column].iloc[i,:]
                 PETH_df = pd.concat([PETH_df,ObtainCI(df)],ignore_index=True)
+            print(PETH_df)
+            print(len(time))
             plt.plot(time,PETH_df['mean'],label=mouse.ID)
             plt.fill_between(time, PETH_df['LB'], PETH_df['UB'], alpha=0.2, label='95% CI')
             legend = plt.legend(loc='upper right')
@@ -66,20 +69,7 @@ def Integration (mouses,parameter_df,output_folder):
         plt.savefig(os.path.join(output_folder,day_column+' average PETH.png'))
         plt.close()
 
-# def LowPassFilter (x):
-#     # Sampling frequency (in Hz)
-#     fs = 130
-#     cutoff = 5
-#     # Normalized cutoff frequency (cutoff frequency / Nyquist frequency)
-#     nyq = 0.5 * fs
-#     normal_cutoff = cutoff / nyq
-#     # Order of the filter
-#     order = 5
-#     # Get the filter coefficients
-#     b, a = signal.butter(order, normal_cutoff, btype='low', analog=False)
-#     y=signal.filtfilt(b, a, x, axis=0)
-#     return y
-
+#This function plot the entire trace with well time labeled
 def PlotFullTrace (parameter_df,parent_folder,COLD_folder,mouse_ID):
     pkl_folder = os.path.join(parent_folder,parameter_df['pkl_folder_tag'])
     for filename in os.listdir(pkl_folder):
@@ -90,8 +80,7 @@ def PlotFullTrace (parameter_df,parent_folder,COLD_folder,mouse_ID):
             for i in df.columns:
                 trail_ID = int(re.findall(r'\d+', i.split('pyData')[1])[0])
                 ftp.Main(df[i],parameter_df,mouse_ID,day,trail_ID,parent_folder,COLD_folder)
-            
-         
+                     
 def ObtainCI (df):
     mean = df.mean()
     std = np.std(df)
@@ -111,8 +100,7 @@ output_folder = grandparent_folder+'output/'
 parent_list = ['1084','1086','1105','6534','6535']
 before_window=5
 after_window=5
-PlotSB = True
-
+Plot_SB = True
 parameter_df = {
     'frame_rate':130,
     'before_win':5,
@@ -122,8 +110,10 @@ parameter_df = {
     'Lowthresold':-2,
     'width':1,
     'sync_parent_tag':'Bonsai',
-    'sync_tag':'sync'
+    'sync_tag':'sync',
+    'pkl_folder_tag': 'results'
     }
+
 mouses = []
 for i in range (len (parent_list)):
     parent_folder = grandparent_folder+parent_list[i]+'/'
@@ -152,20 +142,19 @@ for i in range (len (parent_list)):
     if not SB:
         PlotSB = False
     print('Now reading in:'+parent_list[i])
-    # Read_MultiDays_Save_CB_SB_results (total_days,parent_folder,save_folder,COLD_folder,animalID,parameter_df['before_win'],parameter_df['after_win'],SB=SB)
+    Read_MultiDays_Save_CB_SB_results (total_days,parent_folder,save_folder,COLD_folder,animalID,parameter_df['before_win'],parameter_df['after_win'],SB=SB)
 
-    # '''plot well1 and well2 average PETH for all sessions'''
-    # ''' you need to put all the PETH files with the same half window in the same folder '''
-    # plotCheese.plot_2wells_PETH_all_trials (result_folder,2,2,animalID)
-    # plotCheese.plot_day_average_PETH_together(result_folder,2,2,animalID)
-    # plotCheese.plot_SB_PETH_all_trials (result_folder,3,5,animalID)
-    # plotCheese.plot_day_average_SB_PETH_together (result_folder,3,5,animalID)
-    
+    '''plot well1 and well2 average PETH for all sessions'''
+    ''' you need to put all the PETH files with the same half window in the same folder '''
+    plotCheese.plot_2wells_PETH_all_trials (result_folder,2,2,animalID)
+    plotCheese.plot_day_average_PETH_together(result_folder,2,2,animalID)
+    plotCheese.plot_SB_PETH_all_trials (result_folder,3,5,animalID)
+    plotCheese.plot_day_average_SB_PETH_together (result_folder,3,5,animalID)
     Reward_Latency.PlotRouteScoreGraph(COLD_folder,result_folder,output_folder)
     PlotFullTrace(parameter_df,parent_folder,COLD_folder,animalID)
     
-    # mouses.append(heatmap.Main(parameter_df,animalID,parent_folder))
-    # Integration(mouses,parameter_df,output_folder)
-    
-    
-# MultipleRouteScore.PlotRSForMultipleMouse(output_folder,output_folder,'route_score', 'z_dif')
+    mouses.append(heatmap.Main(parameter_df,animalID,parent_folder))
+    Integration(mouses,parameter_df,output_folder)
+
+MultipleRouteScore.PlotRSForMultipleMouse(output_folder,output_folder,'route_score', 'z_dif')
+

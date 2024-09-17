@@ -171,7 +171,8 @@ def plot_day_average_SB_PETH_together(result_folder,before_window,after_window,a
     for i in range (5):
         idx=i+1
         filtered_columns = list(filter(lambda col: col.startswith(f'Day{idx}') and col.endswith('_enter'), PSTH_collection.columns))
-        Day_Well_PETH = PSTH_collection[filtered_columns]
-        Plot_mean_PSTH_segment(Day_Well_PETH, before_window, after_window, animalID, Label=f'Day{idx} Mean',ax=ax)
+        Day_enter_PETH = PSTH_collection[filtered_columns]
+        Plot_mean_PSTH_segment(Day_enter_PETH, before_window, after_window, animalID, Label=f'Day{idx} Mean',ax=ax)
     ax.set_title('Enter Cheeseboard PETH over days '+animalID)  # Set the title for the first figure
+    plt.show()
     return -1
