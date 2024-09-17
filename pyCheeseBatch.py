@@ -54,6 +54,8 @@ def Integration (mouses,parameter_df,output_folder):
         day_column = 'Day'+str(Day)
         for mouse in mouses:
             PETH_df = pd.DataFrame(columns=['mean', 'UB', 'LB'])
+            if not day_column in mouse.MouseDf.columns:
+                continue
             for i in range (mouse.MouseDf[day_column].shape[0]):
                 df = mouse.MouseDf[day_column].iloc[i,:]
                 PETH_df = pd.concat([PETH_df,ObtainCI(df)],ignore_index=True)
@@ -95,12 +97,14 @@ def ObtainCI (df):
     return data
 #%%
 'This is to call the above function to read all sessions in multiple days for an animal'
+
 grandparent_folder = 'E:/Mingshuai/workingfolder/Group E/'
 output_folder = grandparent_folder+'output/'
 parent_list = ['1084','1086','1105','6534','6535']
 before_window=5
 after_window=5
 Plot_SB = True
+
 parameter_df = {
     'frame_rate':130,
     'before_win':5,
@@ -111,7 +115,6 @@ parameter_df = {
     'width':1,
     'sync_parent_tag':'Bonsai',
     'sync_tag':'sync',
-    'pkl_folder_tag': 'results'
     }
 
 mouses = []
@@ -150,6 +153,7 @@ for i in range (len (parent_list)):
     plotCheese.plot_day_average_PETH_together(result_folder,2,2,animalID)
     plotCheese.plot_SB_PETH_all_trials (result_folder,3,5,animalID)
     plotCheese.plot_day_average_SB_PETH_together (result_folder,3,5,animalID)
+
     Reward_Latency.PlotRouteScoreGraph(COLD_folder,result_folder,output_folder)
     PlotFullTrace(parameter_df,parent_folder,COLD_folder,animalID)
     
