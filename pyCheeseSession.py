@@ -19,7 +19,7 @@ import scipy.signal as signal
 import pickle
 
 class pyCheeseSession:
-    def __init__(self, pyFolder, bonsai_folder,CheeseFolder,COLD_filename,save_folder,animalID='mice1',SessionID='Day1',pySBFolder=None):
+    def __init__(self, pyFolder, bonsai_folder,CheeseFolder,COLD_filename,save_folder,animalID='mice1',SessionID='Day1',pySBFolder=None,CamFs = 24):
         '''
         Parameters
         ----------
@@ -33,7 +33,7 @@ class pyCheeseSession:
         '''
         'Define photometry recording sampling rate and Camera frame rate '
         self.pyFs=130
-        self.CamFs=24
+        self.CamFs=CamFs
         self.pyFolder=pyFolder
         self.bonsai_folder = bonsai_folder
         self.CheeseFolder=CheeseFolder
