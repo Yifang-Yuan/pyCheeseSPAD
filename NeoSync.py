@@ -228,6 +228,7 @@ class singletrail:
     def PlotRewardCollection (self):
         index = 0
         reward_signals_list = []
+        self.AUC_dif_list = []
         D = []
         T = []
         name = 'Day'+str(self.day)+'-'+str(self.ID)
@@ -244,6 +245,12 @@ class singletrail:
             if not os.path.exists(path):
                 os.makedirs(path)
             fig.savefig(os.path.join(path, f"{name}({index})"))
+            l = len(z)
+            seg_a = z[0:int(l/2)]
+            seg_b = z[int(l/2):int(l)]
+            area1 = np.trapz(seg_a)
+            area2 = np.trapz(seg_b)
+            self.AUC_dif_list.append(area1-area2)
             index+=1
             
         header = pd.MultiIndex.from_arrays([D,T])
@@ -252,6 +259,7 @@ class singletrail:
             self.reward_signals.columns.names = ['Day', 'Trail']
         else:
             self.reward_signals = pd.DataFrame()
+        
             
     def PlotLeavingWell(self):
         index = 0
@@ -305,8 +313,8 @@ class singletrail:
         # Calculate the Power Spectral Density using Welch's method
         frequencies, psd = signal.welch(self.CB.zdff, fs, nperseg=256)
         # Define frequency ranges
-        low_freq_band = (frequencies <= 2)
-        high_freq_band = (frequencies > 2)
+        low_freq_band = (frequencies <= 10)
+        high_freq_band = (frequencies > 10)
         
         # Calculate the total power in each band
         low_power = np.sum(psd[low_freq_band])
@@ -433,16 +441,6 @@ class singleday:
         if not os.path.exists(path):
             os.makedirs(path)
         fig.savefig(os.path.join(path,f"Day{self.day} angle"))
-        # self.CBSBCompare()
-    
-    # def CBSBCompare (self):
-    #     CB_mean = []
-    #     SB_mean = []
-    #     for trail in self.trails:
-    #         CB_mean.append(trail.sep_CB_mean)
-    #         SB_mean.append(trail.sep_SB_mean)
-    #     t_stat, p_value = stats.ttest_ind(CB_mean, SB_mean)
-    #     print(f"Independent t-test: t-statistic = {t_stat}, p-value = {p_value}")
     
 class mice:
     def __init__(self,folder,mouse_ID):
@@ -510,7 +508,6 @@ class mice:
             day.Analysis()
             
     def Analysis(self):
-        print('manbo'+output_path)
         dic = {}
         index = 0
         for day in self.days:
@@ -603,11 +600,29 @@ class mice:
             os.makedirs(path)
         fig.savefig(os.path.join(path,f"speed vs angle"))
         
+        self.AUCAnalysis()
+    
+    def AUCAnalysis(self):
+        self.AUC_dif_tot = pd.DataFrame()  # Initialize an empty DataFrame
+        for day in self.days:
+            data = []
+            for trail in day.trails:
+                data.extend(trail.AUC_dif_list)  # Collect data from each trail
+            # Create a DataFrame for the current day's data and concatenate it
+            day_df = pd.DataFrame(data, columns=[f"Day{day.day}"])
+            self.AUC_dif_tot = pd.concat([self.AUC_dif_tot, day_df], axis=1)
+        fig,ax = PlotDicMean(self.AUC_dif_tot,ylab='AUC_difference',title=mouse_name+' Mean AUC difference')
+        path = os.path.join(output_path,'Reward_Collection')
+        if not os.path.exists(path):
+            os.makedirs(path)
+        fig.savefig(os.path.join(path,'AUC_mean'))
         
 class group:
     def __init__(self):
         self.mouse = []
         for file in os.listdir(parameter['grandparent_folder']):
+            global name
+            name = file
             num = re.findall(r'\d+', file)
             if len(num)==0:
                 continue
@@ -627,6 +642,7 @@ class group:
                 self.day_max = day_num
     
         self.FrequencyPowerAnalysis()
+        self.AUCAnalysis()
 
     def FrequencyPowerAnalysis(self):
         # Collect all data into a list of dictionaries
@@ -635,19 +651,19 @@ class group:
         for mouse in self.mouse:
             for day in mouse.days:
                 for trail in day.trails:
-                    data.append({'Mouse ID': mouse.mouse_ID, 'High/Low Frequency Ratio': trail.power_ratio})
+                    data.append({'Mouse ID': mouse.mouse_ID, 'Low/High Frequency Ratio': trail.power_ratio})
     
         # Convert the list of dictionaries to a DataFrame
         ratio_df = pd.DataFrame(data)
     
         # Create a boxplot
         fig, ax = plt.subplots(figsize=(10, 6))
-        sns.boxplot(x='Mouse ID', y='High/Low Frequency Ratio', data=ratio_df, ax=ax)
+        sns.boxplot(x='Mouse ID', y='Low/High Frequency Ratio', data=ratio_df, ax=ax)
     
         # Add a title and labels
-        ax.set_title('Low/High Frequency Energy Ratio Boxplot (2Hz cutoff)')
+        ax.set_title('Low/High Frequency Energy Ratio Boxplot (10Hz cutoff)')
         ax.set_xlabel('Mouse ID')
-        ax.set_ylabel('High/Low Frequency Ratio')
+        ax.set_ylabel('Low/High Frequency Ratio')
         
         # Display the plot
         plt.tight_layout()
@@ -655,6 +671,12 @@ class group:
         # Save the figure
         fig.savefig(os.path.join(parameter['grandparent_folder'], 'Frequency_power_analysis.png'))
     
+    def AUCAnalysis(self):
+        self.AUC_dif_tot = pd.DataFrame()  # Initialize an empty DataFrame
+        for single_mouse in self.mouse:
+            self.AUC_dif_tot = pd.concat([self.AUC_dif_tot, single_mouse.AUC_dif_tot], ignore_index=True)
+        fig,ax = PlotDicMean(self.AUC_dif_tot,ylab='AUC_difference',title='All mice Mean AUC difference')
+        fig.savefig(os.path.join(output_path,'Tot_AUC_mean'))
 
         
 def PlotLinearRegression (x,y,ax):
