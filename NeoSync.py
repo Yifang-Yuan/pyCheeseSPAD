@@ -21,12 +21,13 @@ import random
 import scipy.signal as signal
 
 parameter = {
-    'grandparent_folder':'D:/Photometry/test_tracking/',
+    'grandparent_folder':'D:/Photometry/test_tracking',
     'DLC_folder_tag': 'DLC_output',
     'Bonsai_folder_tag': 'Bonsai',
     'sync_tag': 'sync',
     'CB_tag': 'photometry_CB',
     'SB_tag': 'photometry_SB',
+    'group_tag': 'Group',
     'photometry_frame_rate': 130,
     'CamFs' : 30,
     'before_win': 5,
@@ -37,7 +38,7 @@ pfw = 0
 output_path = None
 mouse_name = None
 has_SB_recording = False
-
+test = None
 
 class single_day:
     def __init__(self,pkl,cold):
@@ -99,7 +100,7 @@ class sync_file:
         
     def ObtainFrameShift (self):
         for i in range (self.df.shape[0]):
-            if np.isnan(self.df['Value.X'].iloc[i]) and np.isnan(self.df['Value.Y'].iloc[i]):
+            if pd.isna(self.df['Value.X'].iloc[i]) and pd.isna(self.df['Value.Y'].iloc[i]):
                 self.frame_shift = i
                 return
     
@@ -166,19 +167,20 @@ class singletrail:
         self.SB = SB
     
     def ObtainMergeZdff(self):
-        #first concat
-        self.merged_signal = pd.concat([self.CB.signal, self.SB.signal])
-        self.merged_reference = pd.concat([self.CB.reference, self.SB.reference])
-        merged_zdff = pf.get_zdFF(self.merged_reference, self.merged_signal)
-        self.sep_CB_zdff = merged_zdff[:len(self.CB.signal)]
-        self.sep_SB_zdff = merged_zdff[len(self.CB.signal):]
-        self.CB.ObtainSepZdff(self.sep_CB_zdff)
-        self.SB.ObtainSepZdff(self.sep_SB_zdff)
-        self.sep_CB_mean = self.sep_CB_zdff.mean()
-        self.sep_SB_mean = self.sep_SB_zdff.mean()
-        # For independent samples t-test
-        # t_stat, p_value = stats.ttest_ind(self.sep_CB_zdff, self.sep_SB_zdff)
-        # print(f"Independent t-test: t-statistic = {t_stat}, p-value = {p_value}")
+        if (has_SB_recording):
+            #first concat
+            self.merged_signal = pd.concat([self.CB.signal, self.SB.signal])
+            self.merged_reference = pd.concat([self.CB.reference, self.SB.reference])
+            merged_zdff = pf.get_zdFF(self.merged_reference, self.merged_signal)
+            self.sep_CB_zdff = merged_zdff[:len(self.CB.signal)]
+            self.sep_SB_zdff = merged_zdff[len(self.CB.signal):]
+            self.CB.ObtainSepZdff(self.sep_CB_zdff)
+            self.SB.ObtainSepZdff(self.sep_SB_zdff)
+            self.sep_CB_mean = self.sep_CB_zdff.mean()
+            self.sep_SB_mean = self.sep_SB_zdff.mean()
+        else:
+            self.sep_CB_zdff = pf.get_zdFF( self.CB.reference, self.CB.signal)
+            self.CB.ObtainSepZdff(self.sep_CB_zdff)
     
     def EventAnalysis (self):
         timeshift_video = self.sync.frame_shift/self.sync.frame_rate
@@ -321,7 +323,7 @@ class singletrail:
         high_power = np.sum(psd[high_freq_band])
         
         # Calculate the high/low frequency power ratio
-        self.power_ratio = low_power / high_power
+        self.power_ratio = high_power / low_power
      
 class singleday:
     #first reading in DLC tracking files
@@ -350,6 +352,7 @@ class singleday:
     def AddBonsai (self,folder):
         for file in os.listdir(folder):
             if parameter['sync_tag'] in file:
+                print(file)
                 path = os.path.join(folder,file)
                 trail_ID = int(re.findall(r'\d+', file.split(parameter['sync_tag'])[1])[0])
                 trail_sync = sync_file(path,self.day,trail_ID)
@@ -379,14 +382,12 @@ class singleday:
             trail.ObtainMergeZdff()
             trail.CalculatePowerRatio()
             self.day_CB_zdff.append(np.array(trail.sep_CB_zdff))
-            self.day_SB_zdff.append(np.array(trail.sep_SB_zdff))
-            
+            if (has_SB_recording):
+                self.day_SB_zdff.append(np.array(trail.sep_SB_zdff))
 
-        
-        
-        
         self.day_CB_zdff = np.concatenate(self.day_CB_zdff, axis=0)
-        self.day_SB_zdff = np.concatenate(self.day_SB_zdff, axis=0)
+        if (has_SB_recording):
+            self.day_SB_zdff = np.concatenate(self.day_SB_zdff, axis=0)
         
         self.tot_velocity = pd.DataFrame()
         self.tot_reward_signal = pd.DataFrame()
@@ -415,13 +416,7 @@ class singleday:
         if not os.path.exists(path):
             os.makedirs(path)
         fig.savefig(os.path.join(path,f"Day{self.day} mean"))
-        
-        fig,ax = PlotSpeedHistogram(self.tot_velocity['zdff'], self.tot_velocity['speed'])
-        path = os.path.join(output_path,'speed')
-        if not os.path.exists(path):
-            os.makedirs(path)
-        fig.savefig(os.path.join(path,f"Day{self.day} speed"))
-        
+          
         fig,ax = PlotSpeedHistogram(self.tot_velocity['zdff'], self.tot_velocity['speed'],title=f"Day{self.day} speed vs zdff")
         path = os.path.join(output_path,'speed')
         if not os.path.exists(path):
@@ -443,13 +438,14 @@ class singleday:
         fig.savefig(os.path.join(path,f"Day{self.day} angle"))
     
 class mice:
-    def __init__(self,folder,mouse_ID):
+    def __init__(self,folder,mouse_ID,group):
         self.photometry_files = []
         self.DLC_pairs = []
         self.frames_files = []
         self.tracking_files = []
         self.mouse_ID = mouse_ID
         self.days = []
+        self.group_name = group
         global mouse_name
         mouse_name = self.mouse_ID
         
@@ -515,11 +511,8 @@ class mice:
             dic[name+'CB'] = day.day_CB_zdff
             dic[name+'SB'] = day.day_SB_zdff
                         
-        fig,ax = PlotDicMean(dic,ylab='zdff_mean',title='zdff mean with error bar')
+        fig,ax = PlotDicMean(dic,ylab='zdff_mean',title=mouse_name+'CB-SB zdff mean with error bar')
         fig.savefig(os.path.join(output_path,'CBSB_comparision'))
-        
-        
-        
         
         self.tot_reward_signal = pd.DataFrame()
         self.tot_leaving_signal = pd.DataFrame()
@@ -530,43 +523,51 @@ class mice:
             self.tot_leaving_signal = pd.concat([self.tot_leaving_signal,day.tot_leaving_signal],axis=1)
             self.tot_velocity = pd.concat([self.tot_velocity,day.tot_velocity],axis=0)
             self.tot_leaving_SB = pd.concat([self.tot_leaving_SB,day.tot_leaving_SB],axis=1)
-        fig,ax = PlotEventHeatMap(self.tot_reward_signal,title='Reward collection heatmap')
+        
+        self.mouse_reward_collection_mean = self.tot_reward_signal.mean(axis=1)
+        global test
+        test =  self.mouse_reward_collection_mean
+        self.mouse_leaving_well_mean = self.tot_leaving_signal.mean(axis=1)
+        self.mouse_leaving_SB_mean = self.tot_leaving_SB.mean(axis=1)
+        
+        
+        fig,ax = PlotEventHeatMap(self.tot_reward_signal,title=mouse_name+'Reward collection heatmap')
         path = os.path.join(output_path,'Reward_Collection')
         if not os.path.exists(path):
             os.makedirs(path)
         fig.savefig(os.path.join(path,'heatmap'))
         
-        fig,ax = PlotEventHeatMap(self.tot_leaving_signal,title='leaving well heatmap')
+        fig,ax = PlotEventHeatMap(self.tot_leaving_signal,title=mouse_name+'leaving well heatmap')
         path = os.path.join(output_path,'Leaving_well')
         if not os.path.exists(path):
             os.makedirs(path)
         fig.savefig(os.path.join(path,'heatmap'))
         
-        fig,ax = PlotEventHeatMap(self.tot_leaving_SB,title='leaving SB heatmap')
+        fig,ax = PlotEventHeatMap(self.tot_leaving_SB,title=mouse_name+'leaving SB heatmap')
         path = os.path.join(output_path,'Leaving_SB')
         if not os.path.exists(path):
             os.makedirs(path)
         fig.savefig(os.path.join(path,'heatmap'))
         
-        fig,ax = PlotEventMean(self.tot_reward_signal,event ='Reward Collection',title='Reward collection mean')
+        fig,ax = PlotEventMean(self.tot_reward_signal,event ='Reward Collection',title=mouse_name+'Reward collection mean')
         path = os.path.join(output_path,'Reward_Collection')
         if not os.path.exists(path):
             os.makedirs(path)
         fig.savefig(os.path.join(path,'Tot mean'))
         
-        fig,ax = PlotEventMean(self.tot_leaving_signal,event = 'leaving well',title='leaving well mean')
+        fig,ax = PlotEventMean(self.tot_leaving_signal,event = 'leaving well',title=mouse_name+'leaving well mean')
         path = os.path.join(output_path,'Leaving_well')
         if not os.path.exists(path):
             os.makedirs(path)
         fig.savefig(os.path.join(path,'Tot mean'))
         
-        fig,ax = PlotEventMean(self.tot_leaving_SB,event = 'leaving SB',title='leaving SB mean')
+        fig,ax = PlotEventMean(self.tot_leaving_SB,event = 'leaving SB',title=mouse_name+'leaving SB mean')
         path = os.path.join(output_path,'Leaving_SB')
         if not os.path.exists(path):
             os.makedirs(path)
         fig.savefig(os.path.join(path,'Tot mean'))
         
-        fig,ax = PlotSpeedHistogram(self.tot_velocity['zdff'], self.tot_velocity['speed'])
+        fig,ax = PlotSpeedHistogram(self.tot_velocity['zdff'], self.tot_velocity['speed'], title=mouse_name+' speed vs zdff')
         path = os.path.join(output_path,'speed')
         if not os.path.exists(path):
             os.makedirs(path)
@@ -579,7 +580,7 @@ class mice:
         for i in range (len(self.tot_velocity['angle'])):
             r = random.randint(0, len(self.tot_velocity['zdff'])-1)
             neo_zdff.append(self.tot_velocity['zdff'].iloc[r])
-        ax = PlotRadianGraph(neo_zdff, self.tot_velocity['angle'], ax, label='Bootstrap Mean', color='orange', linestyle='--',title='Total mean of zdff at different head direction')
+        ax = PlotRadianGraph(neo_zdff, self.tot_velocity['angle'], ax, label='Bootstrap Mean', color='orange', linestyle='--',title=mouse_name+' Total mean of zdff at different head direction')
         ax.legend()
         path = os.path.join(output_path,'angle')
         if not os.path.exists(path):
@@ -587,13 +588,14 @@ class mice:
         fig.savefig(os.path.join(path,f"Tot angle"))
         
         fig, ax = plt.subplots(subplot_kw={'projection': 'polar'}, figsize=(6, 6))
-        ax = PlotRadianGraph(self.tot_velocity['speed'], self.tot_velocity['angle'], ax, label='Original Mean', color='purple')
+        ax = PlotRadianGraph(self.tot_velocity['speed'], self.tot_velocity['angle'], ax, label='Speed Mean', color='green')
         #setting up bootstrap analysis
-        neo_zdff = []
+        neo_z = []
         for i in range (len(self.tot_velocity['angle'])):
             r = random.randint(0, len(self.tot_velocity['speed'])-1)
-            neo_zdff.append(self.tot_velocity['speed'].iloc[r])
-        ax = PlotRadianGraph(neo_zdff, self.tot_velocity['angle'], ax, label='Bootstrap Mean', color='orange', linestyle='--',title='mean of speed at different head direction')
+            neo_z.append(self.tot_velocity['speed'].iloc[r])
+        ax = PlotRadianGraph(neo_z, self.tot_velocity['angle'], ax, label='Bootstrap Mean', color='orange', linestyle='--',title=mouse_name+' zdff and speed at different head direction')
+        # ax = PlotRadianGraph(self.tot_velocity['zdff'], self.tot_velocity['angle'], ax, label='Original Mean',color = 'purple')
         ax.legend()
         path = os.path.join(output_path,'angle')
         if not os.path.exists(path):
@@ -615,24 +617,28 @@ class mice:
         path = os.path.join(output_path,'Reward_Collection')
         if not os.path.exists(path):
             os.makedirs(path)
-        fig.savefig(os.path.join(path,'AUC_mean'))
+        fig.savefig(os.path.join(path,f"{self.mouse_ID} AUC_mean"))
         
 class group:
-    def __init__(self):
+    def __init__(self,parent_folder,parent_name):
+        self.parent_folder = parent_folder
+        self.parent_name = parent_name
         self.mouse = []
-        for file in os.listdir(parameter['grandparent_folder']):
+        for file in os.listdir(parent_folder):
+            if file.endswith('.png'):
+                continue
             global name
             name = file
             num = re.findall(r'\d+', file)
             if len(num)==0:
                 continue
             print('Reading:'+file)
-            path = os.path.join(parameter['grandparent_folder'],file)
+            path = os.path.join(parent_folder,file)
             global output_path
             output_path  = os.path.join(path,'Neo_output')
             if not os.path.exists(output_path):
                 os.makedirs(output_path)
-            self.mouse.append(mice(path,file))
+            self.mouse.append(mice(path,file,self.parent_name))
             self.mouse[-1].Analysis()
         #Obtain day max for mic
         self.day_max = 9999
@@ -640,44 +646,33 @@ class group:
             day_num = len(i.days)
             if day_num<self.day_max:
                 self.day_max = day_num
-    
-        self.FrequencyPowerAnalysis()
         self.AUCAnalysis()
+        self.PlotGroupMean()
 
-    def FrequencyPowerAnalysis(self):
-        # Collect all data into a list of dictionaries
-        data = []
-    
-        for mouse in self.mouse:
-            for day in mouse.days:
-                for trail in day.trails:
-                    data.append({'Mouse ID': mouse.mouse_ID, 'Low/High Frequency Ratio': trail.power_ratio})
-    
-        # Convert the list of dictionaries to a DataFrame
-        ratio_df = pd.DataFrame(data)
-    
-        # Create a boxplot
-        fig, ax = plt.subplots(figsize=(10, 6))
-        sns.boxplot(x='Mouse ID', y='Low/High Frequency Ratio', data=ratio_df, ax=ax)
-    
-        # Add a title and labels
-        ax.set_title('Low/High Frequency Energy Ratio Boxplot (10Hz cutoff)')
-        ax.set_xlabel('Mouse ID')
-        ax.set_ylabel('Low/High Frequency Ratio')
-        
-        # Display the plot
-        plt.tight_layout()
-        
-        # Save the figure
-        fig.savefig(os.path.join(parameter['grandparent_folder'], 'Frequency_power_analysis.png'))
     
     def AUCAnalysis(self):
         self.AUC_dif_tot = pd.DataFrame()  # Initialize an empty DataFrame
         for single_mouse in self.mouse:
             self.AUC_dif_tot = pd.concat([self.AUC_dif_tot, single_mouse.AUC_dif_tot], ignore_index=True)
-        fig,ax = PlotDicMean(self.AUC_dif_tot,ylab='AUC_difference',title='All mice Mean AUC difference')
-        fig.savefig(os.path.join(output_path,'Tot_AUC_mean'))
+        fig,ax = PlotDicMean(self.AUC_dif_tot,ylab='AUC_difference',title=f"{self.parent_name} AUC_mean")
+        fig.savefig(os.path.join(self.parent_folder,f"{self.parent_name} AUC_mean"))
 
+    def PlotGroupMean (self):
+        reward_collection = pd.DataFrame()
+        leaving_well = pd.DataFrame()
+        leaving_SB = pd.DataFrame()
+        for mice in self.mouse:
+            reward_collection = pd.concat([reward_collection,mice.mouse_reward_collection_mean],axis=1)
+            leaving_well = pd.concat([leaving_well,mice.mouse_leaving_well_mean],axis=1)
+            leaving_SB = pd.concat([leaving_SB,mice.mouse_leaving_SB_mean],axis=1)
+        
+        fig,ax = PlotEventMean(reward_collection,event ='Reward Collection',title=self.parent_name+' Reward collection mean')
+        fig.savefig(os.path.join(self.parent_folder,f"{self.parent_name} Reward_collection_mean"))
+        fig,ax = PlotEventMean(leaving_well,event ='Leaving Well',title=self.parent_name+' Leaving Well mean')
+        fig.savefig(os.path.join(self.parent_folder,f"{self.parent_name} Leaving_well_mean"))
+        fig,ax = PlotEventMean(leaving_SB,event ='Leaving SB',title=self.parent_name+' Leaving SB mean')
+        fig.savefig(os.path.join(self.parent_folder,f"{self.parent_name} Leaving_SB_mean"))
+        
         
 def PlotLinearRegression (x,y,ax):
     x = np.array(x)
@@ -688,7 +683,7 @@ def PlotLinearRegression (x,y,ax):
     regression_line = slope * x + intercept
     # Plotting the regression line
     ax.plot(x, regression_line, label='Regression line')
-    
+    plt.close()
 
 def PlotEvent (y,ylab = 'zdff',event = 'event', title = 'title'):
     x = np.linspace(-parameter['before_win'], parameter['after_win'], len(y))
@@ -699,7 +694,7 @@ def PlotEvent (y,ylab = 'zdff',event = 'event', title = 'title'):
     ax.set_ylabel(ylab)
     ax.set_title(title)
     ax.legend(loc='upper right')
-    
+    plt.close()
     return fig, ax
 
 def PlotDicMean (data, ylab = 'mean' ,title = 'Mean with Error Bars', confidence=0.95):
@@ -719,7 +714,7 @@ def PlotDicMean (data, ylab = 'mean' ,title = 'Mean with Error Bars', confidence
     # Adjust the padding between and around subplots for better fit
     plt.tight_layout()
     # Show the plot
-    plt.show()
+    plt.close()
     return fig,ax
 
 def PlotEventMean(df,title = 'mean signal', ylab='zdff',event='event'):
@@ -746,7 +741,7 @@ def PlotEventMean(df,title = 'mean signal', ylab='zdff',event='event'):
     ax.set_ylabel(ylab)
     ax.set_title(title)
     ax.legend(loc='upper right')
-    
+    plt.close()
     return fig,ax
 
 def PlotEventHeatMap(df,title = 'title'):
@@ -759,6 +754,7 @@ def PlotEventHeatMap(df,title = 'title'):
     ax.set_xticklabels(label)
     ax.set_title(title)
     ax.set_xlabel('Time (seconds)')
+    plt.close()
     return fig, ax
 
 def PlotSpeedHistogram(x, y, title='mean zdff at different speed'):
@@ -800,6 +796,7 @@ def PlotSpeedHistogram(x, y, title='mean zdff at different speed'):
     ax.set_title(title)
     
     plt.tight_layout()
+    plt.close()
     return fig, ax
 
 
@@ -847,8 +844,43 @@ def PlotRadianGraph(z, ang, ax=None, label='Mean Signal', color='purple', linest
 
     # Set plot title and legend
     ax.set_title(title)
-
+    plt.close()
     return ax
+
+groups = []
+for folder in os.listdir(parameter['grandparent_folder']):
+    if parameter['group_tag'] in folder:
+        print('Reading:'+folder)
+        path = os.path.join(parameter['grandparent_folder'],folder)
+        groups.append(group(path,folder))
+        
+# FrequencyPowerAnalysis(self):
+# Collect all data into a list of dictionaries
+data = []
+df = pd.DataFrame()
+for group in groups:
+    g = group.parent_name
+    for mouse in group.mouse:
+        m = mouse.mouse_ID
+        for day in mouse.days:
+            for trail in day.trails:
+                data.append({'Mouse ID': f"{g}-{m}", 'High/Low Frequency Ratio': trail.power_ratio})
+# Convert the list of dictionaries to a DataFrame
+ratio_df = pd.DataFrame(data)
+
+# Create a boxplot
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.boxplot(x='Mouse ID', y='High/Low Frequency Ratio', data=ratio_df, ax=ax)
     
-    
-a = group()
+# Add a title and labels
+ax.set_title(f"High/Low Frequency Energy Ratio Boxplot (10Hz cutoff)")
+ax.set_xlabel('Mouse ID')
+ax.set_ylabel('High/Low Frequency Ratio')
+# Rotate x-axis labels for better readability
+plt.xticks(rotation=45, ha='right')
+
+# Display the plot
+plt.tight_layout()
+        
+# Save the figure
+fig.savefig(os.path.join(parameter['grandparent_folder'], 'Frequency_power_analysis.png'))
