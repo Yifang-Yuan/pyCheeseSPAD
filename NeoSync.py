@@ -24,7 +24,7 @@ from scipy.signal import butter, filtfilt
 parameter = {
     #D:\workingfolder\Group A\Group A (non_cue)
     #'grandparent_folder':'D:/workingfolder/Group A/Group A (non_cue)/',
-    'grandparent_folder':'D:/workingfolder/Group E-cued/', 
+    'grandparent_folder':'C:/Users/yifan/Downloads/mouse/', 
     'DLC_folder_tag': 'DLC_output',
     'Bonsai_folder_tag': 'Bonsai',
     'sync_tag': 'sync',
@@ -94,6 +94,15 @@ class sync_file:
     def CalculateFrameRate(self):
         start_timestamp = self.df['Timestamp'].iloc[0]
         end_timestamp = self.df['Timestamp'].iloc[-1]
+        if '.' in start_timestamp:
+            time_part, tz_part = start_timestamp.split('+')  # Split time and timezone
+            time_part = time_part[:time_part.index('.') + 7]  # Keep only up to 6 digits after the decimal
+            start_timestamp = time_part + '+' + tz_part
+        if '.' in end_timestamp:
+            time_part, tz_part = end_timestamp.split('+')  # Split time and timezone
+            time_part = time_part[:time_part.index('.') + 7]  # Keep only up to 6 digits after the decimal
+            end_timestamp = time_part + '+' + tz_part
+    
         start_time = datetime.fromisoformat(start_timestamp)
         end_time = datetime.fromisoformat(end_timestamp)
         duration = (end_time - start_time).total_seconds()
@@ -953,5 +962,5 @@ def PlotRadianGraph(z, ang, ax=None, label='Mean Signal', color='purple', linest
     return ax
     
     
-selected_mouse_ids = ['1786534']
+selected_mouse_ids = ['1756072']
 group_instance = group(mouse_ids=selected_mouse_ids)  # 只分析ID为'1756072'和'1756077'的老鼠
